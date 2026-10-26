@@ -1,0 +1,131 @@
+
+/* Nickname page */
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  box-sizing: border-box;
+  overflow: hidden;
+  position: relative;
+
+  background:
+    radial-gradient(ellipse at 50% 35%, #1b2140 0%, transparent 55%),
+    #0b1020;
+
+  color: #f8fafc;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Subtle arcade tile background */
+.container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(#ffffff06 1px, transparent 1px),
+    linear-gradient(90deg, #ffffff06 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+
+.container h1 {
+  position: relative;
+  z-index: 1;
+  max-width: 800px;
+  margin: 0 0 36px;
+  text-align: center;
+  font-size: clamp(2rem, 5vw, 3.8rem);
+  line-height: 1.15;
+  font-weight: 900;
+  letter-spacing: -1.5px;
+  color: #ffc629;
+  text-shadow:
+    0 3px 0 #bd670b,
+    0 6px 0 #60350e,
+    0 10px 28px #ffb00025;
+}
+
+/* Nickname input */
+.container input {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 580px);
+  box-sizing: border-box;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+
+  color: #ffffff;
+  background: #151b31;
+  border: 2px solid #414a75;
+  border-radius: 16px;
+  outline: none;
+
+  font-size: 1.1rem;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.container input::placeholder {
+  color: #929bbd;
+}
+
+.container input:focus {
+  border-color: #ffc629;
+  box-shadow: 0 0 0 4px #ffc62920;
+}
+
+/* Continue button */
+.container button {
+  position: relative;
+  z-index: 1;
+  min-width: 230px;
+  padding: 17px 34px;
+
+  color: #171526;
+  background: linear-gradient(180deg, #ffd447, #ffab0b);
+  border: 2px solid #ffdb63;
+  border-radius: 16px;
+  box-shadow: 0 5px 0 #a75a08, 0 12px 28px #00000030;
+
+  font-size: 1.15rem;
+  font-weight: 800;
+  cursor: pointer;
+
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.container button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 0 #a75a08, 0 16px 32px #00000040;
+}
+
+.container button:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #a75a08;
+}
+
+.container button:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 5px;
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 24px 18px;
+  }
+
+  .container h1 {
+    margin-bottom: 28px;
+    letter-spacing: -0.5px;
+  }
+
+  .container input {
+    padding: 17px;
+  }
+
+  .container button {
+    width: min(100%, 320px);
+  }
+}
