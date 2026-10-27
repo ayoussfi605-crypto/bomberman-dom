@@ -22,6 +22,10 @@ type IncomingMessage struct {
 	Payload json.RawMessage `json:"payload"`
 }
 
+type PayloadMessage struct {
+	PlayerName string `json:"player_name"`
+}
+
 type JoinPayload struct {
 	Nickname string `json:"nickname"`
 }
@@ -79,6 +83,21 @@ func (c *Client) ReadPump() {
 			}
 
 			GlobalWs.Register <- c
+			message := map[string]interface{}{
+				"type": "joined",
+				"payload": map[string]string{
+					"name": c.Name,
+				},
+			}
+
+			response, err := json.Marshal(message)
+			if err != nil {
+				log.Println("Failed to encode joined message:", err)
+				break
+			}
+
+			GlobalWs.Brodcast <- response
+			continue
 
 		}
 
