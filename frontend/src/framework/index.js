@@ -6,11 +6,13 @@ import h from "./dom/h.js";
 import render from "./dom/render.js";
 import { createRouter } from "./router/index.js";
 const container = document.getElementById("app");
+import  {connect}  from "../services/websocket.js";
 
-const router = createRouter({
-  "/": () => render(PlayerCounter(), container),
+connect();
+
+export const router = createRouter({
+  "/lobby": () => render(PlayerCounter(), container),
   "/name": () => render(NicknamePage(), container),
-  
 });
 
 router.start();
