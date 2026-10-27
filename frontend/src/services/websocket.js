@@ -33,7 +33,7 @@ export function connect() {
 
   socket.addEventListener("close", (e) => {
     emit("connection ", { status: "disconnected" });
-    console.log("WebSocket disconnected" ,e);
+    console.log("WebSocket disconnected");
     socket = null;
   });
 
