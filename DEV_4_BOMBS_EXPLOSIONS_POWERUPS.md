@@ -1,4 +1,4 @@
-# Developer 4 — Bomb Mechanics, Explosion Raycasting, Power-Ups & Combat Rules <MOHAMMED>
+# Developer 4 — Bomb Mechanics, Explosion Raycasting, Power-Ups & Combat Rules <AYOUB>
 
 **Assigned to:** Developer 4  
 **Domain:** Bomb Placement, 4-Directional Explosion Raycasting, Chain Reactions, Block Destruction, Loot Drops & Core Power-Ups (Bombs, Flames, Speed), Player Damage (3 Lives), Elimination & Last Man Standing Victory

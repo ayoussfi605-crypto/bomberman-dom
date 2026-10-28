@@ -1,4 +1,4 @@
-# Developer 2 — Map Generation, Mini-Framework DOM Renderer & 60 FPS Performance  <AYOUB>
+# Developer 2 — Map Generation, Mini-Framework DOM Renderer & 60 FPS Performance  <mohammed>
 
 **Assigned to:** Developer 2  
 **Domain:** Frontend Engine, DOM Graphics Rendering (Strictly No Canvas / WebGL), Mini-Framework VDOM Integration, 60 FPS `requestAnimationFrame` Pipeline, Map Generation & Performance HUD
