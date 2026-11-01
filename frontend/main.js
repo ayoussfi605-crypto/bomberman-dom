@@ -1,31 +1,31 @@
 import { render } from "./src/framework/dom/render.js";
 import { createRouter } from "./src/framework/router/index.js";
+import { socketConnection } from "./src/services/socket.js";
+import { LobbyPage } from "./src/views/lobbyPage.js";
 import { NamePage } from "./src/views/namePage.js";
 
-const socket = io("http://localhost:8080");
-
-socket.on("connect", () => {
-  console.log("Connected:", socket.id);
-
-  socket.emit("player:join", "Yaacoub");
+socketConnection.on("connect", () => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    socketConnection.emit("player:reconnect", { token });
+  }
+  console.log("Connected: form main", socketConnection.id);
+  router.navigate("/");
 });
 
-socket.on("player:joined", (player) => {
-  console.log("Player registered:", player);
+socketConnection.on("player:error", (message) => {
+  console.log("Registration error: from main", message);
 });
 
-socket.on("player:error", (message) => {
-  console.log("Registration error:", message);
-});
-
-socket.on("lobby:players", (players) => {
-  console.log("Lobby players:", players);
+socketConnection.on("lobby:players", (players) => {
+  console.log("Lobby players: from main", players);
 });
 
 const app = document.getElementById("app");
 
-const router = createRouter({
+export const router = createRouter({
   "/": () => render(NamePage(), app),
+  "/lobby": () => render(LobbyPage(), app),
 });
 
 router.start();

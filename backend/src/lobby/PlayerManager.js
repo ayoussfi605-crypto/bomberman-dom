@@ -1,22 +1,23 @@
-const players = new Map();
+import crypto from "node:crypto";
 
-function validateNickname(nickname) {
-  if (typeof nickname !== "string") {
-    return null;
-  }
+export const players = new Map();
+export const tokens = new Map();
+
+export function validateNickname(nickname) {
+  if (typeof nickname !== "string") return null;
 
   const name = nickname.trim();
 
-  if (name.length === 0 || name.length > 16) {
+  if (name.length < 3 || name.length > 16) {
     return null;
   }
 
   return name;
 }
 
-function isNicknameTaken(nickname) {
+export function isNicknameTaken(nickname) {
   for (const player of players.values()) {
-    if (player.nickname.toLowerCase() === nickname.toLowerCase()) {
+    if (player.name.toLowerCase() === nickname.toLowerCase()) {
       return true;
     }
   }
@@ -24,7 +25,17 @@ function isNicknameTaken(nickname) {
   return false;
 }
 
-function registerPlayer(socket, nickname) {
+function idPlayerIdTaken(playerId) {
+  for (const player of players.values()) {
+    if (player.playerId.toLowerCase() === playerId.toLowerCase()) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+export function registerPlayer(socket, nickname, playerId) {
   const name = validateNickname(nickname);
 
   if (!name) {
@@ -34,37 +45,70 @@ function registerPlayer(socket, nickname) {
     };
   }
 
-  if (isNicknameTaken(name)) {
+  if (isNicknameTaken(name) || idPlayerIdTaken(playerId)) {
     return {
       success: false,
       message: "Nickname already taken",
     };
   }
 
+  const playerToken = crypto.randomBytes(32).toString("hex");
+
   const player = {
-    id: socket.id,
-    nickname: name,
+    playerId,
+    name,
+    socketId: socket.id,
+    connected: true,
     lives: 3,
   };
 
-  players.set(socket.id, player);
+  players.set(playerId, player);
+  tokens.set(playerToken, playerId);
 
   return {
     success: true,
-    player,
+    response: {
+      player,
+      playerToken,
+    },
   };
 }
 
-function removePlayer(socketId) {
-  players.delete(socketId);
+// Find player by socket ID and mark disconnected
+export function removePlayer(socketId) {
+  for (const player of players.values()) {
+    if (player.socketId === socketId) {
+      player.connected = false;
+      player.socketId = null;
+
+      return true;
+    }
+  }
+  return false;
 }
 
-function getPlayers() {
-  return Array.from(players.values());
+export function getPlayers() {
+  return Array.from(players.values()).map((player) => ({
+    playerId: player.playerId,
+    name: player.name,
+    lives: player.lives,
+    connected: player.connected,
+  }));
 }
 
-module.exports = {
-  registerPlayer,
-  removePlayer,
-  getPlayers,
-};
+export function StartCounterDown() {
+  const connectedPlayers = Array.from(players.values()).filter(
+    (player) => player.connected,
+  );
+
+  if (connectedPlayers.length >= 2) {
+    return {
+      success: true,
+      counter: 10,
+    };
+  }
+
+  return {
+    success: false,
+  };
+}
