@@ -1,20 +1,10 @@
 import { router } from "../../main.js";
 import { h } from "../framework/dom/h.js";
-import { createRouter } from "../framework/router/index.js";
 import { State } from "../framework/state/index.js";
 import { socketConnection } from "../services/socket.js";
-
 import { PlayerState } from "../state/PlayerState.js";
 
 export function NamePage() {
-  const token = localStorage.getItem("playerToken");
-
-  if (token) {
-    console.log(token);
-    socketConnection.emit("player:reconnect", {
-      token,
-    });
-  }
   const playerName = new State({ name: "" });
 
   const error = h("p", {
@@ -47,15 +37,9 @@ export function NamePage() {
   socketConnection.off("player:joined");
 
   socketConnection.on("player:joined", (data) => {
-    localStorage.setItem("playerId", data.player.playerId);
-    localStorage.setItem("playerToken", data.playerToken);
     PlayerState.setState({
       name: data.player.name,
     });
-    router.navigate("/lobby");
-  });
-  socketConnection.on("player:reconnected", (data) => {
-    console.log("data reconect is", data);
     router.navigate("/lobby");
   });
 

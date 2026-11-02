@@ -1,7 +1,6 @@
 import crypto from "node:crypto";
 
 export const players = new Map();
-export const tokens = new Map();
 
 export function validateNickname(nickname) {
   if (typeof nickname !== "string") return null;
@@ -62,8 +61,7 @@ export function registerPlayer(socket, nickname, playerId) {
     lives: 3,
   };
 
-  players.set(playerId, player);
-  tokens.set(playerToken, playerId);
+  players.set(socket.id, player);
 
   return {
     success: true,
