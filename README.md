@@ -61,9 +61,9 @@ The default `State` still notifies synchronously. Bomberman's store must opt in:
 new State(initialState, { batch: "microtask" });
 ```
 
-`mini-framework/` preserves the original supplied reference snapshot; do not
-modify it or import it from the application. Its TodoMVC implementation was not
-included, so it is not a runnable TodoMVC regression fixture.
+**All framework imports and changes belong in `public/src/framework/`.**
+There is one framework copy in this repository. The supplied source did not
+include TodoMVC, so no original TodoMVC regression fixture is available.
 
 ## Working together
 

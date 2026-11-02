@@ -54,7 +54,7 @@ bomberman-dom/
 
 The server serves `public/` at `/` and `shared/` at `/shared/`. Client code imports constants with `import { ... } from "/shared/constants.js"`. Server imports are relative to the importing module: `server/index.js` uses `"../shared/constants.js"`, while `server/game/game.js` uses `"../../shared/constants.js"`.
 
-`public/src/framework/` is the only maintained runtime framework. `mini-framework/` is the original reference snapshot, excluded from static serving; do not apply patches twice. Framework tests live in `tests/` and `public/dev/framework-check.html`. The supplied TodoMVC implementation is absent, so no TodoMVC regression pass is claimed.
+`public/src/framework/` is the only framework copy in this repository. All application imports and future framework fixes use this directory; the starter patches are already applied. Framework tests live in `tests/` and `public/dev/framework-check.html`. The supplied TodoMVC implementation is absent, so no TodoMVC regression pass is claimed.
 
 ## 4. Conventions
 

@@ -33,7 +33,7 @@ test("starter serves public/shared files and rejects traversal", async t => {
   assert.equal((await get("/%2e%2e/package.json")).status, 403);
   assert.equal((await get("/shared/../../package.json")).status, 403);
   assert.equal((await get("/.git/config")).status, 404);
-  assert.equal((await get("/mini-framework/README.md")).status, 404);
+  assert.equal((await get("/docs/ARCHITECTURE.md")).status, 404);
   assert.equal((await get("/missing.js")).status, 404);
   assert.equal((await get("/%zz")).status, 400);
   assert.equal((await get("/", "POST")).status, 405);

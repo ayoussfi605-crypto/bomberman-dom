@@ -1,8 +1,8 @@
 # Runtime mini-framework
 
 This is the canonical framework used by Bomberman. Hichame owns maintenance.
-The original `mini-framework/` directory is a reference snapshot; do not maintain
-a second runtime there. No build step or client dependencies.
+This is the only framework copy in the repository. Make all framework changes
+here. No build step or client dependencies.
 
 Import public APIs from `index.js`: `h`, `render`, `State`, event helpers,
 `listen`, and `createRouter`.

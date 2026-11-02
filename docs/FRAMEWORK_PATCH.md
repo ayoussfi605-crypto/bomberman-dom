@@ -2,8 +2,8 @@
 
 The canonical runtime is `public/src/framework/`, maintained by Hichame.
 These changes are already implemented; teammates do not need to reapply them.
-The original `mini-framework/` is a reference snapshot, not a second maintained
-runtime. Read the [runtime API](../public/src/framework/README.md).
+This is the only framework copy in the repository. Read the
+[runtime API](../public/src/framework/README.md).
 
 | Change | Behaviour | Verification |
 |---|---|---|
