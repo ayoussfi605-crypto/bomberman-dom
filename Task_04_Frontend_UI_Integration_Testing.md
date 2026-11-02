@@ -1,5 +1,4 @@
-# Task 04 — Game Screen, Rendering, HUD, Outcomes & Integration
-
+# Task 04 — Frontend UI, DOM Rendering & Integration ===> HICHAME
 **Owner:** Developer 4
 **Technology:** JavaScript, HTML, CSS, custom DOM framework, Socket.IO client
 
@@ -85,13 +84,5 @@ docs/MULTIPLAYER_TEST_REPORT.md
 - [ ] HUD values match the authoritative game state.
 - [ ] Winner, draw and forfeit are shown correctly.
 - [ ] No duplicate Socket.IO listeners after navigation.
-- [ ] Disconnects and rejected actions are handled in the UI.
-- [ ] The multiplayer test report covers 2–4 player sessions.
-
-## Coordination
-- Consume the map/collision contract from Task 02 and the `game:*` payloads from
-  Task 03; agree on shapes before building views.
-- Reuse the completed lobby, chat, toast and session-resume work rather than
-  duplicating listeners or state.
-- Report integration bugs back to the owning developer instead of patching game
-  rules in the view layer.
+- [ ] Errors and disconnects are handled.
+- [ ] Tests cover the required mechanics.
