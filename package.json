@@ -1,0 +1,18 @@
+{
+  "name": "bomberman-dom",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "DOM Bomberman built with the team's mini-framework",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node --test",
+    "test:browser": "node scripts/check-framework-browser.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

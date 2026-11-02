@@ -1,0 +1,12 @@
+:root {
+  color-scheme: dark;
+  --p0: #e63946; --p1: #2a9df4; --p2: #2ecc71; --p3: #f1c40f;
+  --bg: #11151c; --fg: #eef2f7; --panel: #1b2330; --accent: #f1c40f;
+  font-family: system-ui, sans-serif;
+  color: var(--fg);
+  background: var(--bg);
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+.starter { max-width: 48rem; margin: 10vh auto; padding: 2rem; }
+a { color: var(--accent); }
