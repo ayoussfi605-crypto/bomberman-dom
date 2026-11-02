@@ -493,16 +493,140 @@ export { addEvent, removeEvent, removeEvents, handleKey } from "./events/index.j
 export { createRouter } from "./router/index.js";
 
 ========================================
-FILE: ./frontend/src/views/namePage.js
+FILE: ./frontend/src/services/socket.js
+========================================
+
+export const socketConnection = io("http://localhost:8080");
+
+
+========================================
+FILE: ./frontend/src/state/PlayerState.js
+========================================
+
+import { State } from "../framework/state/index.js";
+
+export const PlayerState = new State({ id: "", name: "", lives: 3, id: "" });
+
+========================================
+FILE: ./frontend/src/views/lobbyPage.js
 ========================================
 
 import { h } from "../framework/dom/h.js";
 
+export function LobbyPage() {
+  return h("h1", {}, "Helooo");
+}
 
+========================================
+FILE: ./frontend/src/views/namePage.js
+========================================
 
+import { router } from "../../main.js";
+import { h } from "../framework/dom/h.js";
+import { createRouter } from "../framework/router/index.js";
+import { State } from "../framework/state/index.js";
+import { socketConnection } from "../services/socket.js";
+
+import { PlayerState } from "../state/PlayerState.js";
 
 export function NamePage() {
-  return h("h1", {}, "naming page");
+  const token = localStorage.getItem("playerToken");
+
+  if (token) {
+    console.log(token);
+    socketConnection.emit("player:reconnect", {
+      token,
+    });
+  }
+  const playerName = new State({ name: "" });
+
+  const error = h("p", {
+    id: "name-error",
+    className: "name-error",
+  });
+
+  function HandleClick(e) {
+    e.preventDefault();
+
+    const { name } = playerName.getState();
+    const username = name.trim();
+
+    if (username.length < 3) {
+      error.textContent = "Username must be at least 3 characters";
+      return;
+    }
+
+    if (!socketConnection.connected) {
+      error.textContent = "Server connection unavailable";
+      return;
+    }
+
+    socketConnection.emit("player:join", {
+      username,
+      playerId: username + "_123",
+    });
+  }
+
+  socketConnection.off("player:joined");
+
+  socketConnection.on("player:joined", (data) => {
+    localStorage.setItem("playerId", data.player.playerId);
+    localStorage.setItem("playerToken", data.playerToken);
+    PlayerState.setState({
+      name: data.player.name,
+    });
+    router.navigate("/lobby");
+  });
+  socketConnection.on("player:reconnected", (data) => {
+    console.log("data reconect is", data);
+    router.navigate("/lobby");
+  });
+
+  socketConnection.off("player:error");
+  socketConnection.on("player:error", (message) => {
+    error.textContent = message;
+  });
+
+  return h(
+    "div",
+    { className: "name-page" },
+    h(
+      "div",
+      { className: "name-card" },
+      h("h1", {}, "BOMBERMAN"),
+      h("p", {}, "Choose your player name"),
+
+      h(
+        "div",
+        { id: "name-form" },
+        h("input", {
+          type: "text",
+          id: "player-name",
+          placeholder: "Enter your username",
+          minLength: 3,
+          maxLength: 16,
+          autocomplete: "off",
+          required: true,
+
+          onInput: (e) => {
+            playerName.setState({ name: e.target.value });
+            error.textContent = "";
+          },
+        }),
+
+        error,
+
+        h(
+          "button",
+          {
+            id: "play-button",
+            onClick: HandleClick,
+          },
+          "PLAY",
+        ),
+      ),
+    ),
+  );
 }
 
 ========================================
@@ -524,7 +648,10 @@ FILE: ./frontend/package.json
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs"
+  "type": "commonjs",
+  "devDependencies": {
+    "vite": "^8.3.5"
+  }
 }
 
 ========================================
@@ -539,9 +666,10 @@ FILE: ./frontend/index.html
     <title>Document</title>
   </head>
   <body>
+    sdhkajshd
     <div id="app"></div>
     <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
-<script type="module" src="./main.js"></script>
+    <script type="module" src="./main.js"></script>
   </body>
 </html>
 
@@ -551,32 +679,32 @@ FILE: ./frontend/main.js
 
 import { render } from "./src/framework/dom/render.js";
 import { createRouter } from "./src/framework/router/index.js";
+import { socketConnection } from "./src/services/socket.js";
+import { LobbyPage } from "./src/views/lobbyPage.js";
 import { NamePage } from "./src/views/namePage.js";
 
-const socket = io("http://localhost:8080");
-
-socket.on("connect", () => {
-  console.log("Connected:", socket.id);
-
-  socket.emit("player:join", "Yaacoub");
+socketConnection.on("connect", () => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    socketConnection.emit("player:reconnect", { token });
+  }
+  console.log("Connected: form main", socketConnection.id);
+  router.navigate("/");
 });
 
-socket.on("player:joined", (player) => {
-  console.log("Player registered:", player);
+socketConnection.on("player:error", (message) => {
+  console.log("Registration error: from main", message);
 });
 
-socket.on("player:error", (message) => {
-  console.log("Registration error:", message);
-});
-
-socket.on("lobby:players", (players) => {
-  console.log("Lobby players:", players);
+socketConnection.on("lobby:players", (players) => {
+  console.log("Lobby players: from main", players);
 });
 
 const app = document.getElementById("app");
 
-const router = createRouter({
+export const router = createRouter({
   "/": () => render(NamePage(), app),
+  "/lobby": () => render(LobbyPage(), app),
 });
 
 router.start();
@@ -628,75 +756,101 @@ See the four task files for developer responsibilities.
 FILE: ./Task_04_Frontend_UI_Integration_Testing.md
 ========================================
 
-# Task 04 — Frontend UI, Integration & Testing
-
-**Owner:** Developer 4  
+# Task 04 — Frontend UI, DOM Rendering & Integration ===> HICHAME
+**Owner:** Developer 4
 **Technology:** JavaScript, HTML, CSS, custom DOM framework, Socket.IO client
 
 ## Mission
-Build the user-facing screens and integrate the lobby, game engine, combat
-system, and Socket.IO communication.
+Build all user-facing screens, implement DOM-based game rendering, display game entities and integrate the frontend with the backend and game engine.
 
 ## Step 1 — Nickname page
 - Show a nickname input and Join button.
 - Validate empty and overlong nicknames in the UI.
 - Display server-side validation errors.
 - Enter the lobby only after server acceptance.
-
 ## Step 2 — Waiting room
-- Display the player's nickname and current count (up to four).
+- Display the player's nickname and current player count (up to four).
 - Show connected players.
 - Display server countdown updates.
 - Include lobby chat and message input.
 - Show errors when a room is full or cannot start.
-
-## Step 3 — Game screen
-- Render the fixed grid map with DOM elements.
+## Step 3 — DOM game rendering
+- Render the fixed grid map using DOM elements.
+- Display indestructible walls and destructible blocks.
 - Display players and their positions.
-- Show lives, bomb capacity, flame range, and speed upgrades.
-- Display bombs, explosions, blocks, and power-ups.
+- Display bombs, explosions and power-ups.
+- Update only the elements that have changed.
+- Avoid recreating the entire map on every update.
+## Step 4 — Player visual representation
+- Convert grid coordinates into screen positions.
+- Update player positions visually.
+- Implement player movement animations.
+- Display player lives and upgrades.
+- Display bomb capacity, flame range and speed.
+## Step 5 — Game interface
+- Build the main game screen.
+- Create the Player HUD.
+- Display player statistics and match information.
 - Show winner or draw when the match ends.
-
-## Step 4 — Socket.IO integration
-Use `socket.io-client`.
+- Handle eliminated players in the interface.
+## Step 6 — Socket.IO integration
+Use socket.io-client.
 - Listen for lobby updates and countdown events.
 - Send nickname and chat requests.
-- Send movement and bomb-placement requests.
-- Render authoritative state updates from the server.
-- Handle connection loss, reconnection, and rejected actions.
+- Receive authoritative game-state updates.
+- Display player positions received from the server.
+- Handle connection loss and reconnection.
+- Handle rejected actions and errors.
 - Remove listeners when views are destroyed.
-- Avoid duplicate event handlers after navigation.
-
-## Step 5 — Integration and testing
-- Test with two, three, and four browser sessions.
+- Avoid duplicate Socket.IO listeners after navigation.
+## Step 7 — Integration and testing
+- Test with two, three and four browser sessions.
 - Test duplicate nicknames and invalid inputs.
 - Test countdown cancellation and disconnects.
 - Test chat and game-state synchronization.
-- Test bombs, lives, power-ups, and victory conditions.
-- Check console errors, keyboard controls, and performance.
+- Test movement, bombs, lives and power-ups.
+- Check console errors and keyboard controls.
+- Verify that the interface remains responsive.
 
-## Suggested files
-- `frontend/src/views/NicknamePage.js`
-- `frontend/src/views/WaitingRoom.js`
-- `frontend/src/views/GamePage.js`
-- `frontend/src/views/GameOverPage.js`
-- `frontend/src/components/Chat.js`
-- `frontend/src/components/PlayerHUD.js`
-- `frontend/src/services/SocketClient.js`
-- `frontend/src/main.js`
-- `frontend/src/styles/`
+`Suggested files`
+frontend/src/views/
+├── NicknamePage.js
+├── WaitingRoom.js
+├── GamePage.js
+└── GameOverPage.js
+
+`frontend/src/components/`
+├── Chat.js
+├── PlayerHUD.js
+├── GameBoard.js
+├── PlayerView.js
+├── BombView.js
+└── PowerUpView.js
+
+`frontend/src/services/`
+ └── SocketClient.js
+
+`frontend/src/styles/`
 
 ## Deliverables
-Nickname screen, waiting room/chat, game UI, game-over screen, integration,
-and a multiplayer test report.
+- Nickname screen.
+- Waiting room and chat interface.
+- DOM-based game rendering.
+- Player visual representation and animations.
+- Game HUD.
+- Game-over screen.
+- Frontend/backend integration.
+- Multiplayer testing report.
 
 ## Acceptance checklist
 - [ ] All screens use the custom DOM framework.
-- [ ] UI reflects server-confirmed state.
-- [ ] Lobby and game events work in multiple browsers.
-- [ ] Errors and disconnects are handled.
+- [ ] No Canvas or WebGL.
+- [ ] Map is rendered using DOM elements.
+- [ ] Players, bombs, explosions and power-ups are displayed.
+- [ ] UI reflects server-confirmed game state.
+- [ ] Player movement is visually updated.
 - [ ] No duplicate Socket.IO listeners after navigation.
-- [ ] No Canvas, WebGL, or prohibited UI frameworks.
+- [ ] Errors and disconnects are handled.
 - [ ] Tests cover the required mechanics.
 
 ========================================
@@ -786,25 +940,26 @@ player elimination, and victory detection.
 FILE: ./backend/src/lobby/PlayerManager.js
 ========================================
 
-const players = new Map();
+import crypto from "node:crypto";
 
-function validateNickname(nickname) {
-  if (typeof nickname !== "string") {
-    return null;
-  }
+export const players = new Map();
+export const tokens = new Map();
+
+export function validateNickname(nickname) {
+  if (typeof nickname !== "string") return null;
 
   const name = nickname.trim();
 
-  if (name.length === 0 || name.length > 16) {
+  if (name.length < 3 || name.length > 16) {
     return null;
   }
 
   return name;
 }
 
-function isNicknameTaken(nickname) {
+export function isNicknameTaken(nickname) {
   for (const player of players.values()) {
-    if (player.nickname.toLowerCase() === nickname.toLowerCase()) {
+    if (player.name.toLowerCase() === nickname.toLowerCase()) {
       return true;
     }
   }
@@ -812,7 +967,17 @@ function isNicknameTaken(nickname) {
   return false;
 }
 
-function registerPlayer(socket, nickname) {
+function idPlayerIdTaken(playerId) {
+  for (const player of players.values()) {
+    if (player.playerId.toLowerCase() === playerId.toLowerCase()) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+export function registerPlayer(socket, nickname, playerId) {
   const name = validateNickname(nickname);
 
   if (!name) {
@@ -822,40 +987,73 @@ function registerPlayer(socket, nickname) {
     };
   }
 
-  if (isNicknameTaken(name)) {
+  if (isNicknameTaken(name) || idPlayerIdTaken(playerId)) {
     return {
       success: false,
       message: "Nickname already taken",
     };
   }
 
+  const playerToken = crypto.randomBytes(32).toString("hex");
+
   const player = {
-    id: socket.id,
-    nickname: name,
+    playerId,
+    name,
+    socketId: socket.id,
+    connected: true,
     lives: 3,
   };
 
-  players.set(socket.id, player);
+  players.set(playerId, player);
+  tokens.set(playerToken, playerId);
 
   return {
     success: true,
-    player,
+    response: {
+      player,
+      playerToken,
+    },
   };
 }
 
-function removePlayer(socketId) {
-  players.delete(socketId);
+// Find player by socket ID and mark disconnected
+export function removePlayer(socketId) {
+  for (const player of players.values()) {
+    if (player.socketId === socketId) {
+      player.connected = false;
+      player.socketId = null;
+
+      return true;
+    }
+  }
+  return false;
 }
 
-function getPlayers() {
-  return Array.from(players.values());
+export function getPlayers() {
+  return Array.from(players.values()).map((player) => ({
+    playerId: player.playerId,
+    name: player.name,
+    lives: player.lives,
+    connected: player.connected,
+  }));
 }
 
-module.exports = {
-  registerPlayer,
-  removePlayer,
-  getPlayers,
-};
+export function StartCounterDown() {
+  const connectedPlayers = Array.from(players.values()).filter(
+    (player) => player.connected,
+  );
+
+  if (connectedPlayers.length >= 2) {
+    return {
+      success: true,
+      counter: 10,
+    };
+  }
+
+  return {
+    success: false,
+  };
+}
 
 ========================================
 FILE: ./backend/src/server.js
@@ -863,11 +1061,13 @@ FILE: ./backend/src/server.js
 
 import http from "node:http";
 import { Server } from "socket.io";
-
 import {
-  registerPlayer,
-  removePlayer,
   getPlayers,
+  removePlayer,
+  registerPlayer,
+  StartCounterDown,
+  players,
+  tokens,
 } from "./lobby/PlayerManager.js";
 
 const httpServer = http.createServer();
@@ -875,7 +1075,7 @@ const PORT = 8080;
 
 const ws = new Server(httpServer, {
   cors: {
-    origin: ["http://127.0.0.1:5500", "http://localhost:5500"],
+    origin: ["http://localhost:3000"],
     methods: ["GET", "POST"],
   },
 });
@@ -883,17 +1083,11 @@ const ws = new Server(httpServer, {
 ws.on("connection", (socket) => {
   console.log("Client connected:", socket.id);
 
-  socket.on("player:join", (nickname) => {
-    const result = registerPlayer(socket, nickname);
-
-    if (!result.success) {
-      socket.emit("player:error", result.message);
-      return;
-    }
-
-    socket.emit("player:joined", result.player);
-
-    ws.emit("lobby:players", getPlayers());
+  socket.on("player:join", (data) => {
+    HandlePlayerJoin(socket, data);
+  });
+  socket.on("player:reconnect", (data) => {
+    HandlePlayerReconnect(socket, data);
   });
 
   socket.on("disconnect", () => {
@@ -908,6 +1102,68 @@ ws.on("connection", (socket) => {
 httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+function HandlePlayerJoin(socket, data) {
+  const result = registerPlayer(socket, data.username, data.playerId);
+
+  if (!result.success) {
+    socket.emit("player:error", result.message);
+    return;
+  }
+
+  socket.data.playerId = result.response.player.playerId;
+
+  socket.emit("player:joined", result.response);
+
+  ws.emit("lobby:players", getPlayers());
+
+  const counter = StartCounterDown();
+
+  if (counter.success) {
+    ws.emit("lobby:count", counter.counter);
+  }
+  console.log(players, tokens);
+}
+
+function HandlePlayerReconnect(socket, data) {
+  console.log("reconect", tokens);
+  console.log(data);
+  console.log(tokens.get(data.token));
+
+  const playerId = tokens.get(data.token);
+
+  if (!playerId) {
+    socket.emit("player:error", "Invalid token");
+    return;
+  }
+
+  console.log(playerId);
+
+  const player = players.get(playerId);
+
+  if (!player) {
+    console.log("not found", playerId);
+
+    socket.emit("player:error", "Player not found");
+    return;
+  }
+
+  // Update socket connection
+  player.socketId = socket.id;
+  player.connected = true;
+
+  socket.data.playerId = playerId;
+
+  socket.emit("player:reconnected", {
+    playerId: player.playerId,
+    name: player.name,
+    lives: player.lives,
+  });
+
+  ws.emit("lobby:players", getPlayers());
+
+  console.log("reconect finle ", tokens);
+}
 
 ========================================
 FILE: ./backend/package.json
@@ -1107,71 +1363,70 @@ FILE: ./Task_02_Game_Engine_Map_Performance.md
 ========================================
 
 # Task 02 — Game Engine, Map & Performance
-
-**Owner:** Developer 2  
-**Technology:** JavaScript, custom DOM framework
+**Owner**: Developer 2
+**Technology**: JavaScript, custom DOM framework
 
 ## Mission
-Implement the fixed grid map, efficient rendering, movement, collision
-detection, and main game loop.
+Implement the core game engine, fixed grid map, movement rules, collision detection and performance monitoring.
 
 ## Step 1 — Integrate the custom framework
 - Reuse the framework from the mini-framework project.
-- Do not introduce React, Vue, Angular, or another UI framework.
+- Do not introduce React, Vue, Angular or another UI framework.
 - Keep game logic independent of DOM implementation details.
-
 ## Step 2 — Create the map
-- Use a fixed grid visible to every player.
-- Define map dimensions and tile size.
-- Use a deterministic layout for indestructible walls.
+- Define map dimensions and grid structure.
+- Define a deterministic layout for indestructible walls.
 - Generate destructible blocks randomly.
 - Keep all starting areas clear and safe.
-- Leave enough space for players to escape bombs at spawn points.
+- Ensure players have enough space to escape bombs at spawn points.
 - Coordinate the map representation with the backend game module.
-
 ## Step 3 — Movement and collisions
 - Represent player positions using grid coordinates.
-- Convert grid coordinates to visual positions.
-- Prevent movement through walls and intact blocks.
+- Implement movement rules.
+- Prevent movement through indestructible walls and intact blocks.
+- Validate movement against the game map.
 - Coordinate movement requests with the authoritative server.
 - Keep optional client prediction/interpolation separate.
-
-## Step 4 — Rendering loop
-- Use `requestAnimationFrame` for visual updates.
-- Avoid recreating the whole map every frame.
-- Update only DOM elements that changed.
-- Avoid unnecessary layout reads and repeated style recalculations.
+## Step 4 — Game loop
+- Implement the main game loop using requestAnimationFrame.
+- Separate game updates from visual rendering.
+- Manage game timing.
+- Avoid unnecessary calculations every frame.
 - Stop or pause animation work when the game is inactive.
-- Keep network events separate from frame rendering.
-
-## Step 5 — Measure performance
+## Step 5 — Performance monitoring
 - Measure frame intervals and calculate FPS.
-- Track long frames and expensive rendering.
-- Use browser developer tools to profile CPU, layout, and paint.
-- Test with four players, many blocks, and repeated explosions.
-- Target 60 FPS on agreed reference hardware and document test results.
+- Track long frames and expensive calculations.
+- Use browser developer tools to profile performance.
+- Test with four players, many blocks and repeated explosions.
+- Target 60 FPS and document performance results.
 
-## Suggested files
-- `frontend/src/engine/GameLoop.js`
-- `frontend/src/engine/Map.js`
-- `frontend/src/engine/Collision.js`
-- `frontend/src/engine/Movement.js`
-- `frontend/src/engine/PerformanceMonitor.js`
-- `frontend/src/entities/Player.js`
-- `frontend/src/entities/Block.js`
-- `frontend/src/entities/Wall.js`
+`Suggested files`
+frontend/src/engine/
+├── GameLoop.js
+├── Map.js
+├── Collision.js
+├── Movement.js
+└── PerformanceMonitor.js
+
+`frontend/src/entities/`
+ ├── Player.js
+ ├── Block.js
+ └── Wall.js
 
 ## Deliverables
-- Fixed grid map and safe starting corners.
-- Collision and movement system.
-- Efficient DOM rendering.
-- FPS/frame-time monitoring and performance notes.
+- Fixed grid map.
+- Random destructible blocks.
+- Safe starting corners.
+- Movement and collision logic.
+- Main game loop.
+- FPS monitoring and performance report.
 
 ## Acceptance checklist
 - [ ] No Canvas or WebGL.
 - [ ] Custom DOM framework is used.
-- [ ] All players see the same logical map.
+- [ ] All players share the same logical map.
 - [ ] Walls and blocks have different collision behavior.
 - [ ] Starting areas are safe.
-- [ ] Rendering uses `requestAnimationFrame`.
+- [ ] Movement rules work correctly.
+- [ ] Rendering updates are coordinated with the game loop.
 - [ ] Performance is measured in a four-player test.
