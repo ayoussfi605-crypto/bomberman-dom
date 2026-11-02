@@ -4,13 +4,10 @@ export const players = new Map();
 
 export function validateNickname(nickname) {
   if (typeof nickname !== "string") return null;
-
   const name = nickname.trim();
-
   if (name.length < 3 || name.length > 16) {
     return null;
   }
-
   return name;
 }
 
@@ -20,7 +17,6 @@ export function isNicknameTaken(nickname) {
       return true;
     }
   }
-
   return false;
 }
 
@@ -30,7 +26,6 @@ function idPlayerIdTaken(playerId) {
       return true;
     }
   }
-
   return false;
 }
 
@@ -70,19 +65,6 @@ export function registerPlayer(socket, nickname, playerId) {
       playerToken,
     },
   };
-}
-
-// Find player by socket ID and mark disconnected
-export function removePlayer(socketId) {
-  for (const player of players.values()) {
-    if (player.socketId === socketId) {
-      player.connected = false;
-      player.socketId = null;
-
-      return true;
-    }
-  }
-  return false;
 }
 
 export function getPlayers() {
