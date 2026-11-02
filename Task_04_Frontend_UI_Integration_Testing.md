@@ -1,96 +1,97 @@
-# Task 04 — Frontend UI, DOM Rendering & Integration
+# Task 04 — Game Screen, Rendering, HUD, Outcomes & Integration
+
 **Owner:** Developer 4
 **Technology:** JavaScript, HTML, CSS, custom DOM framework, Socket.IO client
 
 ## Mission
-Build all user-facing screens, implement DOM-based game rendering, display game entities and integrate the frontend with the backend and game engine.
+Own everything the player sees during a match: the game screen, efficient DOM
+rendering of the board and entities, the HUD, the game-over experience, and the
+end-to-end integration and multiplayer testing of the finished game.
 
-## Step 1 — Nickname page
-- Show a nickname input and Join button.
-- Validate empty and overlong nicknames in the UI.
-- Display server-side validation errors.
-- Enter the lobby only after server acceptance.
-## Step 2 — Waiting room
-- Display the player's nickname and current player count (up to four).
-- Show connected players.
-- Display server countdown updates.
-- Include lobby chat and message input.
-- Show errors when a room is full or cannot start.
-## Step 3 — DOM game rendering
-- Render the fixed grid map using DOM elements.
-- Display indestructible walls and destructible blocks.
-- Display players and their positions.
-- Display bombs, explosions and power-ups.
-- Update only the elements that have changed.
-- Avoid recreating the entire map on every update.
-## Step 4 — Player visual representation
-- Convert grid coordinates into screen positions.
-- Update player positions visually.
-- Implement player movement animations.
-- Display player lives and upgrades.
-- Display bomb capacity, flame range and speed.
-## Step 5 — Game interface
-- Build the main game screen.
-- Create the Player HUD.
-- Display player statistics and match information.
-- Show winner or draw when the match ends.
-- Handle eliminated players in the interface.
-## Step 6 — Socket.IO integration
-Use socket.io-client.
-- Listen for lobby updates and countdown events.
-- Send nickname and chat requests.
-- Receive authoritative game-state updates.
-- Display player positions received from the server.
-- Handle connection loss and reconnection.
-- Handle rejected actions and errors.
-- Remove listeners when views are destroyed.
-- Avoid duplicate Socket.IO listeners after navigation.
-## Step 7 — Integration and testing
-- Test with two, three and four browser sessions.
-- Test duplicate nicknames and invalid inputs.
-- Test countdown cancellation and disconnects.
-- Test chat and game-state synchronization.
-- Test movement, bombs, lives and power-ups.
-- Check console errors and keyboard controls.
-- Verify that the interface remains responsive.
+## Step 1 — Game screen and board rendering
+- Add the game route and mount a game screen from `game:start`.
+- Render the fixed grid with DOM elements only, using the map snapshot from
+  Task 02 (walls, blocks and empty tiles).
+- Convert grid coordinates to screen positions exactly once per update.
+- Update only cells whose tile changed; never rebuild the whole board.
+- Keep cell elements reusable across matches.
 
-`Suggested files`
+## Step 2 — Player views and animation
+- Render every player with a clear identity and colour.
+- Update player positions from authoritative state.
+- Animate movement between tiles without blocking input.
+- Show eliminated players distinctly instead of removing them abruptly.
+
+## Step 3 — Entity views
+- Render bombs with a visible fuse state.
+- Render explosion flames per direction and tile.
+- Render power-ups by type (bomb, flame, speed).
+- Drive all entity views from `game:*` events only; no client-side rule guessing.
+
+## Step 4 — HUD and match information
+- Show lives, bomb capacity, flame range and speed for the local player.
+- Show the other players' lives/status compactly.
+- Display match status and the current player count.
+- Update through `game:playerUpdated`/`game:state` without flicker.
+
+## Step 5 — Outcomes and disconnects
+- Show the winner or draw from `game:over`.
+- Show a forfeit result when a player leaves mid-match.
+- Handle being eliminated while still watching the match.
+- Return to the lobby cleanly (or offer a rematch path) and reset view state.
+- Keep the refreshed-tab case working with the existing session resume.
+
+## Step 6 — Socket integration and multiplayer testing
+- Register game listeners once, next to the existing lobby listeners in
+  `main.js`; remove/unsubscribe when views are destroyed.
+- Send `player:move` and `bomb:place` requests and surface rejections.
+- Handle connection loss/reconnect during a match without duplicate listeners.
+- Test 2, 3 and 4 browser sessions: countdown, duplicate nicknames, invalid
+  inputs, chat, disconnects, power-ups and match end.
+- Record FPS observations from Task 02's monitor and write the multiplayer test
+  report in `docs/`.
+
+## Suggested files
+```
 frontend/src/views/
-├── NicknamePage.js
-├── WaitingRoom.js
 ├── GamePage.js
 └── GameOverPage.js
-
-`frontend/src/components/`
-├── Chat.js
-├── PlayerHUD.js
+frontend/src/components/
 ├── GameBoard.js
 ├── PlayerView.js
 ├── BombView.js
-└── PowerUpView.js
-
-`frontend/src/services/`
- └── SocketClient.js
-
-`frontend/src/styles/`
+├── ExplosionView.js
+├── PowerUpView.js
+└── PlayerHUD.js
+frontend/src/styles/
+docs/MULTIPLAYER_TEST_REPORT.md
+```
 
 ## Deliverables
-- Nickname screen.
-- Waiting room and chat interface.
-- DOM-based game rendering.
-- Player visual representation and animations.
-- Game HUD.
-- Game-over screen.
-- Frontend/backend integration.
-- Multiplayer testing report.
+- Game screen and game-over screen.
+- DOM board rendering with minimal updates.
+- Player, bomb, explosion and power-up views.
+- Player HUD with lives and upgrades.
+- Game-over, draw and forfeit handling.
+- Socket integration with listener cleanup.
+- Multiplayer test report with FPS observations.
 
 ## Acceptance checklist
-- [ ] All screens use the custom DOM framework.
-- [ ] No Canvas or WebGL.
-- [ ] Map is rendered using DOM elements.
-- [ ] Players, bombs, explosions and power-ups are displayed.
-- [ ] UI reflects server-confirmed game state.
-- [ ] Player movement is visually updated.
+- [ ] All screens use the custom DOM framework; no Canvas or WebGL.
+- [ ] The board is rendered with DOM elements and patched, not rebuilt.
+- [ ] Players, bombs, explosions and power-ups are displayed correctly.
+- [ ] The UI mirrors server-confirmed state only.
+- [ ] Player movement is animated as tiles are crossed.
+- [ ] HUD values match the authoritative game state.
+- [ ] Winner, draw and forfeit are shown correctly.
 - [ ] No duplicate Socket.IO listeners after navigation.
-- [ ] Errors and disconnects are handled.
-- [ ] Tests cover the required mechanics.
+- [ ] Disconnects and rejected actions are handled in the UI.
+- [ ] The multiplayer test report covers 2–4 player sessions.
+
+## Coordination
+- Consume the map/collision contract from Task 02 and the `game:*` payloads from
+  Task 03; agree on shapes before building views.
+- Reuse the completed lobby, chat, toast and session-resume work rather than
+  duplicating listeners or state.
+- Report integration bugs back to the owning developer instead of patching game
+  rules in the view layer.
