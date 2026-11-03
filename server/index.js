@@ -1,30 +1,37 @@
 import { WebSocketServer } from "ws";
+import { handleMessage } from "../shared/messagesHadler";
+import { HandleJoin } from "../shared/joinHandler";
 
-const socket = new WebSocketServer({ port: 8080 });
+const wss = new WebSocketServer({ port: 8080 });
 
-console.log("server runing on port 8080");
+console.log("server running on port 8080");
 
-socket.on("connection", (ws) => {
-  console.log("conection");
+wss.on("connection", (ws) => {
+  console.log("Client connected!");
 
   ws.on("message", (rawMessage) => {
     try {
-      const data = JSON.parse(rawMessage);
+      const message = JSON.parse(rawMessage);
 
-      switch (data.type) {
+      switch (message.type) {
         case "join":
-          HandleJoin(data.data);
+          HandleJoin(message.data);
+          break; // <-- Added missing break!
+
+        case "message":
+          handleMessage(message.data, ws, wss);
           break;
 
         default:
+          console.warn("Unknown message type:", message.type);
           break;
       }
     } catch (error) {
       console.error("Invalid JSON received:", error);
     }
   });
-});
 
-function HandleJoin(data) {
-  console.log(data.name);
-}
+  ws.on("close", () => {
+    console.log("Client disconnected");
+  });
+});

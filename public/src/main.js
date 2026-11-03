@@ -9,6 +9,10 @@ function Handleclick() {
 
   send("join", { name: "heloo" });
 }
+
+function HandleSendMessage() {
+  send("message", { message: "fiiiine" });
+}
 //
 
 render(
@@ -22,6 +26,7 @@ render(
       "The development starter is ready. Multiplayer gameplay is under construction.",
     ),
     h("button", { onClick: Handleclick }, "Run framework checks"),
+    h("button", { onClick: HandleSendMessage }, "send Message"),
   ),
   document.getElementById("app"),
 );
