@@ -13,6 +13,22 @@
     "test:browser": "node scripts/check-framework-browser.js"
   },
   "dependencies": {
-    "ws": "^8.18.0"
-  }
+    "ws": "^8.22.1"
+  },
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yelhaoua/bomberman-dom.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yelhaoua/bomberman-dom/issues"
+  },
+  "homepage": "https://github.com/yelhaoua/bomberman-dom#readme"
 }

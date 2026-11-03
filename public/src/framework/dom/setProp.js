@@ -1,5 +1,5 @@
 import { addEvent } from "../events/index.js";
-import applyStyle from "./style.js";
+import  applyStyle  from "./style.js";
 
 export default function addprop(vnode, element) {
   if (!vnode.props) return element;

@@ -33,7 +33,8 @@ export default function applyStyle(element, oldStyle, newStyle) {
   }
   if (!isStyleObject(oldStyle)) {
     clearStyle(element);
-    for (const [name, value] of Object.entries(newStyle)) setStyleProp(element, name, value);
+    for (const [name, value] of Object.entries(newStyle))
+      setStyleProp(element, name, value);
     return;
   }
   for (const name of Object.keys(oldStyle)) {
