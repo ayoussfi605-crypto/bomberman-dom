@@ -1,75 +1,202 @@
-// M0 static starter. Yacobe adds the WebSocket transport and room here in M1.
-import { createServer } from "node:http";
-import { readFile, realpath, stat } from "node:fs/promises";
-import { dirname, extname, isAbsolute, relative, resolve, sep } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+// server/index.js
+// Static HTTP server (public/ at /, shared/ at /shared/) + WebSocket bootstrap.
 
-const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const publicRoot = resolve(projectRoot, "public");
-const sharedRoot = resolve(projectRoot, "shared");
-const mimeTypes = {
+import http from "node:http";
+import { createReadStream } from "node:fs";
+import { stat } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { WebSocketServer } from "ws";
+
+import { MAX_MESSAGE_BYTES } from "../shared/constants.js";
+import { createRoom } from "./lobby/room.js";
+import { attachTransport } from "./net/transport.js";
+
+const ROOT = path.resolve(fileURLToPath(new URL("..", import.meta.url)));
+const PUBLIC_DIR = path.join(ROOT, "public");
+const SHARED_DIR = path.join(ROOT, "shared");
+
+const PORT = Number(process.env.PORT) || 8080;
+const HEARTBEAT_MS = 30_000;
+
+const MIME = {
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
+  ".mjs": "text/javascript; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".json": "application/json; charset=utf-8",
-  ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
-  ".ico": "image/x-icon", ".woff2": "font/woff2",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".ico": "image/x-icon",
+  ".svg": "image/svg+xml",
+  ".woff2": "font/woff2",
+  ".woff": "font/woff",
+  ".md": "text/markdown; charset=utf-8",
 };
 
-function inside(root, path) {
-  const suffix = relative(root, path);
-  return suffix !== ".." && !suffix.startsWith(`..${sep}`) && !isAbsolute(suffix);
+function mimeType(filePath) {
+  return MIME[path.extname(filePath).toLowerCase()] ?? "application/octet-stream";
 }
 
-export function createAppServer() {
-  return createServer(async (request, response) => {
-    response.setHeader("Cache-Control", "no-store");
-    response.setHeader("X-Content-Type-Options", "nosniff");
-    if (request.method !== "GET" && request.method !== "HEAD") {
-      response.writeHead(405, { Allow: "GET, HEAD" }).end();
-      return;
+function sendText(res, status, text, method) {
+  res.writeHead(status, {
+    "Content-Type": "text/plain; charset=utf-8",
+    "Cache-Control": "no-store",
+  });
+  res.end(method === "HEAD" ? undefined : `${status} ${text}\n`);
+}
+
+/** Maps a request path to a file inside public/ or shared/, or returns a status. */
+function resolveFile(rawPath) {
+  let pathname;
+  try {
+    pathname = decodeURIComponent(rawPath);
+  } catch {
+    return { status: 400, text: "Bad Request" };
+  }
+
+  if (pathname.includes("\0")) return { status: 400, text: "Bad Request" };
+
+  let root = PUBLIC_DIR;
+  let relative = pathname;
+  if (pathname === "/shared" || pathname.startsWith("/shared/")) {
+    root = SHARED_DIR;
+    relative = pathname.slice("/shared".length) || "/";
+  }
+
+  if (relative === "/") relative = "/index.html";
+
+  // Resolve first, then verify the result is still inside the root.
+  const filePath = path.resolve(root, `.${relative}`);
+  if (filePath !== root && !filePath.startsWith(root + path.sep)) {
+    return { status: 403, text: "Forbidden" };
+  }
+
+  return { filePath };
+}
+
+async function handleRequest(req, res) {
+  const method = req.method ?? "GET";
+  if (method !== "GET" && method !== "HEAD") return sendText(res, 405, "Method Not Allowed", method);
+
+  const rawPath = (req.url ?? "/").split("?")[0].split("#")[0] || "/";
+  const target = resolveFile(rawPath);
+  if (target.status) return sendText(res, target.status, target.text, method);
+
+  let info;
+  try {
+    info = await stat(target.filePath);
+  } catch {
+    return sendText(res, 404, "Not Found", method);
+  }
+  if (!info.isFile()) return sendText(res, 404, "Not Found", method);
+
+  res.writeHead(200, {
+    "Content-Type": mimeType(target.filePath),
+    "Content-Length": info.size,
+    "Cache-Control": "no-store",
+  });
+
+  if (method === "HEAD") {
+    res.end();
+    return;
+  }
+
+  const stream = createReadStream(target.filePath);
+  stream.on("error", () => res.destroy());
+  stream.pipe(res);
+}
+
+export function createAppServer({ logger = console, room: injectedRoom } = {}) {
+  const server = http.createServer((req, res) => {
+    handleRequest(req, res).catch((error) => {
+      logger.error?.("[http] request failed:", error);
+      if (!res.headersSent) sendText(res, 500, "Internal Server Error", req.method);
+      else res.destroy();
+    });
+  });
+
+  const wss = new WebSocketServer({
+    server,
+    perMessageDeflate: false,
+    maxPayload: MAX_MESSAGE_BYTES,
+  });
+
+  const room = injectedRoom ?? createRoom({ logger });
+  attachTransport({ wss, room, logger });
+
+  // Heartbeat: ping every 30 s, terminate a socket that missed the previous ping.
+  wss.on("connection", (ws) => {
+    ws.isAlive = true;
+    ws.on("pong", () => {
+      ws.isAlive = true;
+    });
+  });
+
+  const heartbeat = setInterval(() => {
+    for (const ws of wss.clients) {
+      if (ws.isAlive === false) {
+        ws.terminate();
+        continue;
+      }
+      ws.isAlive = false;
+      try {
+        ws.ping();
+      } catch {
+        ws.terminate();
+      }
     }
+  }, HEARTBEAT_MS);
+  if (typeof heartbeat.unref === "function") heartbeat.unref();
+
+  server.on("close", () => {
+    clearInterval(heartbeat);
+    room.stop?.();
     try {
-      const pathname = decodeURIComponent(request.url.split("?")[0]);
-      const isShared = pathname.startsWith("/shared/");
-      const root = isShared ? sharedRoot : publicRoot;
-      const route = isShared ? pathname.slice("/shared/".length) : pathname.slice(1);
-      const candidate = resolve(root, route || "index.html");
-      if (!inside(root, candidate)) {
-        response.writeHead(403).end();
-        return;
-      }
-      const path = await realpath(candidate);
-      if (!inside(root, path)) {
-        response.writeHead(403).end();
-        return;
-      }
-      if (!(await stat(path)).isFile()) {
-        response.writeHead(404).end();
-        return;
-      }
-      const body = await readFile(path);
-      response.writeHead(200, {
-        "Content-Type": mimeTypes[extname(path)] ?? "application/octet-stream",
-        "Content-Length": body.length,
-      });
-      response.end(request.method === "HEAD" ? undefined : body);
-    } catch (error) {
-      const status = error instanceof URIError ? 400
-        : ["ENOENT", "ENOTDIR", "EISDIR"].includes(error.code) ? 404 : 500;
-      response.writeHead(status).end();
-      if (status === 500) console.error("Static request failed:", error);
+      wss.close();
+    } catch {
+      // Already closing.
     }
   });
+
+  server.on("error", (error) => logger.error?.("[http] server error:", error));
+  wss.on("error", (error) => logger.error?.("[ws] server error:", error));
+
+  return server;
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
-  const server = createAppServer();
-  server.on("error", error => {
-    console.error("Server failed:", error.message);
-    process.exitCode = 1;
+/** Loads mohamed's engine when it exists, otherwise the temporary placeholder. */
+async function loadGameFactory(logger) {
+  try {
+    const module = await import("./game/game.js");
+    if (typeof module.createGame === "function") {
+      logger.log?.("[room] using server/game/game.js");
+      return module.createGame;
+    }
+  } catch {
+    logger.log?.("[room] engine not available yet (server/game/game.js is missing)");
+  }
+  return undefined;
+}
+
+const isMain =
+  process.argv[1] !== undefined &&
+  pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url;
+
+if (isMain) {
+  const createGame = await loadGameFactory(console);
+  const room = createRoom(createGame ? { createGame } : {});
+  const server = createAppServer({ room });
+
+  server.listen(PORT, () => {
+    console.log(`Bomberman server listening on http://localhost:${PORT}`);
   });
-  server.listen(Number(process.env.PORT ?? 8080), () => {
-    console.log(`Bomberman starter: http://localhost:${server.address().port}`);
-  });
+
+  const shutdown = () => {
+    server.close(() => process.exit(0));
+    setTimeout(() => process.exit(0), 500).unref();
+  };
+  process.once("SIGINT", shutdown);
+  process.once("SIGTERM", shutdown);
 }
