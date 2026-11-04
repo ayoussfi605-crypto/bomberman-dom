@@ -1,17 +1,19 @@
 // M0 smoke page. Ayoub replaces this with initUI/initGame/socket wiring in M1.
 import { h, render } from "./framework/index.js";
-import { connect, send } from "./net/sokect.js";
+import { createSocket } from "./net/socket.js";
 
-connect();
+const socket = createSocket();
+
+socket.connect();
 
 function Handleclick() {
   console.log("click");
 
-  send("join", { name: "heloo" });
+  socket.send("join", { nickname: "heloo" });
 }
 
 function HandleSendMessage() {
-  send("message", { message: "fiiiine" });
+  socket.send("chat", { text: "fiiiine" });
 }
 //
 
