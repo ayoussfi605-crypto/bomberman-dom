@@ -66,23 +66,15 @@ export function createLobbyScreen(state) {
   );
 }
 
-/**
- * 3. Render Game Over Screen
- */
+// 3. Render Game Over Screen
 export function createGameOverScreen(state, onRestart) {
-  const container = document.createElement('div');
-  container.className = 'screen-card';
-
   const winnerName = state.winner ? state.winner.nickname : 'DRAW!';
 
-  container.innerHTML = `
-    <h1 class="screen-title">GAME OVER</h1>
-    <h2 style="margin-bottom: 24px; color: var(--p1-color);">Winner: ${winnerName}</h2>
-    <button id="btn-restart" class="btn-primary">BACK TO LOBBY</button>
-  `;
-
-  container.querySelector('#btn-restart').addEventListener('click', onRestart);
-  return container;
+  return h('div', { class: 'screen-card' },
+    h('h1', { class: 'screen-title' }, 'GAME OVER'),
+    h('h2', { style: 'margin-bottom: 24px; color: var(--p1-color);' }, `Winner: ${winnerName}`),
+    h('button', { class: 'btn-primary', onclick: onRestart }, 'BACK TO LOBBY')
+  );
 }
 
 
