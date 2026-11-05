@@ -16,7 +16,7 @@
 
 | type | data | Allowed when | Notes |
 |---|---|---|---|
-| `join` | `{ "nickname": "Ada" }` | not joined, room phase `lobby` | trim; 2–12 chars; `NICK_REGEX`; unique case-insensitively among joined players |
+| `join` | `{ "nickname": "Ada" }` | not joined, room phase `lobby` | trim; 2–12 chars; `NIKC_REGEX`; unique case-insensitively among joined players |
 | `chat` | `{ "text": "hello" }` | joined (lobby or playing, dead players too) | trim; empty → ignored silently; > 200 chars → `BAD_MESSAGE`; max 5 per 5 s per player → `RATE_LIMITED`; control characters stripped |
 | `input` | `{ "dir": "up" \| "down" \| "left" \| "right" \| null }` | joined, phase `playing` | **sent only when the effective direction changes**. `null` = stop. Last-pressed key wins (client keeps the held-keys stack). |
 | `bomb` | `{}` (data may be omitted) | joined, phase `playing` | one-shot event; the engine decides if it is legal |

@@ -1,5 +1,5 @@
 /* ==========================================
-   APP CENTRAL STORE (Ayoub Task)
+   APP CENTRAL STORE 
    ========================================== */
 
 // Import State class from your mini-framework
