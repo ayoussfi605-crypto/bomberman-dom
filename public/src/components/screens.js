@@ -79,7 +79,7 @@ export function createGameOverScreen(state, onRestart) {
 
 
 // 4. Render Game Screen Layout (Shell for Game Board + Chat Sidebar)
-export function createGameScreen(state) {
+export function createGameScreen(state, chatVNode) {
   const playerStats = state.players.map((player, i) => 
     h('div', { class: `player-stat-card p${i}-border` },
       h('span', { class: `color-indicator p${i}-bg` }),
@@ -92,7 +92,7 @@ export function createGameScreen(state) {
     h('div', { class: 'players-header' }, ...playerStats),
     h('div', { class: 'game-main-content' },
       h('div', { id: 'game-board', class: 'game-board-container' }),
-      h('div', { id: 'chat-container', class: 'chat-sidebar-container' })
+      h('div', { id: 'chat-container', class: 'chat-sidebar-container' }, chatVNode) // Directly pass Chat VNode here!
     )
   );
 }
