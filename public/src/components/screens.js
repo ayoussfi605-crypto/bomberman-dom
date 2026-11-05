@@ -2,44 +2,36 @@
    UI SCREENS GENERATOR 
    ========================================== */
 
-/**
- * 1. Render Nickname Screen
- */
+import { h } from '../framework/index.js';
+
+// 1. Render Nickname Screen
 export function createNicknameScreen(state, onSubmit) {
-  const container = document.createElement('div');
-  container.className = 'screen-card';
-
-  container.innerHTML = `
-    <h1 class="screen-title">Bomberman DOM</h1>
-    <form class="nickname-form" id="nickname-form">
-      <input 
-        type="text" 
-        id="nickname-input" 
-        class="nickname-input" 
-        placeholder="Enter your nickname..." 
-        maxlength="12"
-        required 
-        autocomplete="off"
-      />
-      <button type="submit" class="btn-primary">JOIN GAME</button>
-    </form>
-    ${state.connectionError ? `<div class="error-badge">${state.connectionError}</div>` : ''}
-  `;
-
-  const form = container.querySelector('#nickname-form');
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const input = container.querySelector('#nickname-input');
-    const name = input.value.trim();
-    if (name) onSubmit(name);
-  });
-
-  return container;
+  return h('div', { class: 'screen-card' },
+    h('h1', { class: 'screen-title' }, 'Bomberman DOM'),
+    h('form', {
+      class: 'nickname-form',
+      onsubmit: (e) => {
+        e.preventDefault();
+        const input = e.target.querySelector('#nickname-input');
+        if (input && input.value.trim()) onSubmit(input.value.trim());
+      }
+    },
+      h('input', {
+        type: 'text',
+        id: 'nickname-input',
+        class: 'nickname-input',
+        placeholder: 'Enter your nickname...',
+        maxlength: '12',
+        required: true,
+        autocomplete: 'off'
+      }),
+      h('button', { type: 'submit', class: 'btn-primary' }, 'JOIN GAME')
+    ),
+    state.connectionError ? h('div', { class: 'error-badge' }, state.connectionError) : null
+  );
 }
 
-/**
- * 2. Render Lobby Waiting Room Screen
- */
+// 2. Render Lobby Waiting Room Screen
 export function createLobbyScreen(state) {
   const container = document.createElement('div');
   container.className = 'screen-card lobby-card';
