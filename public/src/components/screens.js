@@ -80,39 +80,19 @@ export function createGameOverScreen(state, onRestart) {
 
 // 4. Render Game Screen Layout (Shell for Game Board + Chat Sidebar)
 export function createGameScreen(state) {
-  const container = document.createElement('div');
-  container.className = 'game-screen-layout';
+  const playerStats = state.players.map((player, i) => 
+    h('div', { class: `player-stat-card p${i}-border` },
+      h('span', { class: `color-indicator p${i}-bg` }),
+      h('span', { class: 'player-name' }, player.nickname),
+      h('span', { class: 'player-lives' }, '❤️ x3')
+    )
+  );
 
-  // Render player stats header
-  let statsHTML = '<div class="players-header">';
-  state.players.forEach((player, i) => {
-    statsHTML += `
-      <div class="player-stat-card p${i}-border">
-        <span class="color-indicator p${i}-bg"></span>
-        <span class="player-name">${player.nickname}</span>
-        <span class="player-lives">❤️ x3</span>
-      </div>
-    `;
-  });
-  statsHTML += '</div>';
-
-  container.innerHTML = `
-    <!-- Top Player Stats Bar -->
-    ${statsHTML}
-
-    <!-- Main Game Area: Board + Chat Sidebar -->
-    <div class="game-main-content">
-      <!-- 1. Reserved Area for Teammate's Game Board Engine -->
-      <div id="game-board" class="game-board-container">
-        <!-- Game engine will render map cells here -->
-      </div>
-
-      <!-- 2. Reserved Area for Ayoub's Chat UI -->
-      <div id="chat-container" class="chat-sidebar-container">
-        <!-- Chat UI component will be mounted here -->
-      </div>
-    </div>
-  `;
-
-  return container;
+  return h('div', { class: 'game-screen-layout' },
+    h('div', { class: 'players-header' }, ...playerStats),
+    h('div', { class: 'game-main-content' },
+      h('div', { id: 'game-board', class: 'game-board-container' }),
+      h('div', { id: 'chat-container', class: 'chat-sidebar-container' })
+    )
+  );
 }
