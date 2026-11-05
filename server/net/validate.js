@@ -1,9 +1,3 @@
-// server/net/validate.js
-// Parses and validates client -> server frames. Never throws: a malformed frame
-// must come back as { ok: false, code } and never crash the server.
-//
-// Contract: PROTOCOL.md §2 and docs/ARCHITECTURE.md §7.1.
-
 import {
   C2S,
   CHAT_MAX_LEN,
@@ -18,7 +12,8 @@ const DIRECTIONS = new Set(Object.values(DIR));
 const ERROR_MESSAGES = {
   [ERR.BAD_MESSAGE]: "Malformed message",
   [ERR.UNKNOWN_TYPE]: "Unknown message type",
-  [ERR.NICK_INVALID]: "Nickname must be 2-12 characters (letters, digits, _ or -)",
+  [ERR.NICK_INVALID]:
+    "Nickname must be 2-12 characters (letters, digits, _ or -)",
   [ERR.NICK_TAKEN]: "Nickname already used",
   [ERR.ROOM_FULL]: "Room is full",
   [ERR.GAME_IN_PROGRESS]: "A game is already in progress",
@@ -42,7 +37,8 @@ function isPlainObject(value) {
 function toText(raw) {
   if (typeof raw === "string") return raw;
   if (raw instanceof Uint8Array) return Buffer.from(raw).toString("utf8");
-  if (raw instanceof ArrayBuffer) return Buffer.from(new Uint8Array(raw)).toString("utf8");
+  if (raw instanceof ArrayBuffer)
+    return Buffer.from(new Uint8Array(raw)).toString("utf8");
   return null;
 }
 
@@ -54,7 +50,8 @@ export function parseMessage(raw) {
   try {
     const text = toText(raw);
     if (text === null) return fail(ERR.BAD_MESSAGE);
-    if (Buffer.byteLength(text, "utf8") > MAX_MESSAGE_BYTES) return fail(ERR.BAD_MESSAGE);
+    if (Buffer.byteLength(text, "utf8") > MAX_MESSAGE_BYTES)
+      return fail(ERR.BAD_MESSAGE);
 
     let message;
     try {
@@ -66,14 +63,15 @@ export function parseMessage(raw) {
     if (!isPlainObject(message)) return fail(ERR.BAD_MESSAGE);
 
     const { type } = message;
-    if (typeof type !== "string" || !CLIENT_TYPES.has(type)) return fail(ERR.UNKNOWN_TYPE);
+    if (typeof type !== "string" || !CLIENT_TYPES.has(type))
+      return fail(ERR.UNKNOWN_TYPE);
 
     const payload = message.data;
 
     switch (type) {
       case C2S.BOMB: {
-        // `data` may be omitted entirely.
-        if (payload === undefined || payload === null) return { ok: true, type, data: {} };
+        if (payload === undefined || payload === null)
+          return { ok: true, type, data: {} };
         if (!isPlainObject(payload)) return fail(ERR.BAD_MESSAGE);
         return { ok: true, type, data: {} };
       }
@@ -94,7 +92,8 @@ export function parseMessage(raw) {
       }
 
       case C2S.INPUT: {
-        if (!isPlainObject(payload) || !("dir" in payload)) return fail(ERR.BAD_MESSAGE);
+        if (!isPlainObject(payload) || !("dir" in payload))
+          return fail(ERR.BAD_MESSAGE);
         const { dir } = payload;
         if (dir !== null && !DIRECTIONS.has(dir)) return fail(ERR.BAD_MESSAGE);
         return { ok: true, type, data: { dir } };
@@ -104,7 +103,6 @@ export function parseMessage(raw) {
         return fail(ERR.UNKNOWN_TYPE);
     }
   } catch {
-    // Defensive: no exception may escape the parser.
     return fail(ERR.BAD_MESSAGE);
   }
 }

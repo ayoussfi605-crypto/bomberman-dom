@@ -1,7 +1,3 @@
-// server/lobby/room.js
-// The only module that knows sessions, the lobby state machine, and the engine.
-// Owns phases (lobby / playing), the snapshot broadcast, and the game loop.
-
 import {
   C2S,
   COLS,
@@ -45,10 +41,7 @@ export function createRoom(options = {}) {
   let tickCount = 0;
   let lastRateLog = now();
 
-  // ------------------------------------------------------------ sending
-
   function broadcast(type, data) {
-    // Serialize once and send the same frame to everyone (PROTOCOL.md §1).
     const payload = JSON.stringify({ type, data });
     for (const session of sessions) {
       if (!session.joined) continue;
@@ -79,8 +72,6 @@ export function createRoom(options = {}) {
   function helloData() {
     return { phase, count: currentCount(), max: maxPlayers };
   }
-
-  // ------------------------------------------------------------ lobby polling
 
   function stopPoll() {
     if (pollTimer !== null) {
@@ -114,10 +105,7 @@ export function createRoom(options = {}) {
     broadcastLobbyIfChanged();
   }
 
-  // ------------------------------------------------------------ game
-
   function startGame(entries) {
-    // The engine is mohamed's module: until it lands there is nothing to start.
     if (typeof createGame !== "function") {
       logger.error?.(
         "[room] no game engine: server/game/game.js does not exist yet, the match cannot start",
@@ -125,11 +113,17 @@ export function createRoom(options = {}) {
       return;
     }
 
-    const players = entries.map((entry, slot) => ({ slot, nickname: entry.nickname }));
+    const players = entries.map((entry, slot) => ({
+      slot,
+      nickname: entry.nickname,
+    }));
 
     let nextGame;
     try {
-      nextGame = createGame(players.map((player) => ({ ...player })), now());
+      nextGame = createGame(
+        players.map((player) => ({ ...player })),
+        now(),
+      );
     } catch (error) {
       logger.error?.("[room] could not create the game:", error);
       return;
@@ -152,7 +146,6 @@ export function createRoom(options = {}) {
       if (session && session.joined) receivers.push(session);
     }
 
-    // `you` differs per player, everything else is identical.
     for (const session of receivers) {
       session.send(S2C.START, {
         you: session.slot,
@@ -163,7 +156,7 @@ export function createRoom(options = {}) {
       });
     }
 
-    broadcast(S2C.SNAPSHOT, game.getSnapshot()); // tick 0, right after `start`
+    broadcast(S2C.SNAPSHOT, game.getSnapshot());
 
     loop = createLoop(stepGame, tickMs);
     loop.start();
@@ -184,8 +177,8 @@ export function createRoom(options = {}) {
 
     const result = game.step(dtMs);
 
-    // `tiles` always travels before the snapshot of the same tick.
-    if (result && result.tilesChanged) broadcast(S2C.TILES, { tiles: game.getTiles() });
+    if (result && result.tilesChanged)
+      broadcast(S2C.TILES, { tiles: game.getTiles() });
 
     broadcast(S2C.SNAPSHOT, game.getSnapshot());
     logTickRate();
@@ -203,7 +196,6 @@ export function createRoom(options = {}) {
     }
     game = null;
 
-    // Full per-game reset: slots, membership and lobby state.
     for (const session of sessions) {
       session.joined = false;
       session.slot = null;
@@ -216,8 +208,6 @@ export function createRoom(options = {}) {
     for (const session of sessions) session.send(S2C.HELLO, helloData());
     ensurePoll();
   }
-
-  // ------------------------------------------------------------ handlers
 
   function handleJoin(session, data) {
     if (phase === "playing") return fail(session, ERR.GAME_IN_PROGRESS);
@@ -233,7 +223,7 @@ export function createRoom(options = {}) {
     session.send(S2C.JOINED, { nickname: result.nickname });
     broadcastLobbyIfChanged();
     broadcastChat(null, `${result.nickname} joined`);
-    tickLobby(); // 4th player => countdown starts immediately
+    tickLobby();
   }
 
   function handleChat(session, data) {
@@ -241,7 +231,7 @@ export function createRoom(options = {}) {
     if (!chatGate.allow(session.id)) return fail(session, ERR.RATE_LIMITED);
 
     const text = sanitizeText(data.text);
-    if (!text) return; // empty message: ignored silently
+    if (!text) return;
 
     broadcastChat(session.nickname, text);
   }

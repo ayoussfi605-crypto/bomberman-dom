@@ -1,7 +1,3 @@
-// server/net/rateLimit.js
-// Sliding-window limiter. One instance per socket (all messages) and one per
-// player (chat). Injectable clock keeps it testable.
-
 import { MAX_MESSAGES_PER_SECOND } from "../../shared/constants.js";
 
 export function createRateLimiter({

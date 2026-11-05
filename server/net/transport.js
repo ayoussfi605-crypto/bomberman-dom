@@ -1,7 +1,3 @@
-// server/net/transport.js
-// Attaches a socket: parse + validate + rate limit, then route to the room.
-// Every handler is defensive: one broken session must never kill the process.
-
 import { ERR, S2C } from "../../shared/constants.js";
 import { createSession } from "./session.js";
 import { errorMessage, parseMessage } from "./validate.js";
@@ -12,7 +8,8 @@ const WS_CONNECTING = 0;
 
 function closeSocket(ws, code, reason) {
   try {
-    if (ws.readyState === WS_OPEN || ws.readyState === WS_CONNECTING) ws.close(code, reason);
+    if (ws.readyState === WS_OPEN || ws.readyState === WS_CONNECTING)
+      ws.close(code, reason);
   } catch {
     // Already gone.
   }
@@ -31,7 +28,10 @@ export function attachTransport({ wss, room, logger = console, now } = {}) {
     if (session.closed) return;
 
     if (!session.limiter.take()) {
-      session.send(S2C.ERROR, { code: ERR.RATE_LIMITED, message: errorMessage(ERR.RATE_LIMITED) });
+      session.send(S2C.ERROR, {
+        code: ERR.RATE_LIMITED,
+        message: errorMessage(ERR.RATE_LIMITED),
+      });
       return;
     }
 
@@ -49,7 +49,6 @@ export function attachTransport({ wss, room, logger = console, now } = {}) {
   }
 
   function onConnection(ws, request) {
-    // `request.socket` is the documented connection socket (not ws._socket).
     try {
       request?.socket?.setNoDelay?.(true);
     } catch {

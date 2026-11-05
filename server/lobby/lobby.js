@@ -1,7 +1,3 @@
-// server/lobby/lobby.js
-// PURE lobby state machine: no sockets, no timers. The clock is injected so the
-// timer table in PROTOCOL.md §4 can be tested exactly.
-
 import {
   ERR,
   LOBBY_COUNTDOWN_MS,
@@ -18,11 +14,13 @@ export function validateNickname(raw, takenNicknames = []) {
   if (typeof raw !== "string") return ERR.NICK_INVALID;
 
   const nickname = raw.trim();
-  if (nickname.length < NICK_MIN || nickname.length > NICK_MAX) return ERR.NICK_INVALID;
+  if (nickname.length < NICK_MIN || nickname.length > NICK_MAX)
+    return ERR.NICK_INVALID;
   if (!NICK_REGEX.test(nickname)) return ERR.NICK_INVALID;
 
   const lower = nickname.toLowerCase();
-  if (takenNicknames.some((other) => other.toLowerCase() === lower)) return ERR.NICK_TAKEN;
+  if (takenNicknames.some((other) => other.toLowerCase() === lower))
+    return ERR.NICK_TAKEN;
 
   return null;
 }
@@ -33,9 +31,7 @@ export function createLobby({
   waitMs = LOBBY_WAIT_MS,
   countdownMs = LOBBY_COUNTDOWN_MS,
 } = {}) {
-  /** id -> { id, nickname } — a Map keeps join order. */
   const players = new Map();
-  /** null | { kind: "wait" | "start", endsAt: number } */
   let timer = null;
 
   function nicknames() {
@@ -57,10 +53,8 @@ export function createLobby({
     players.set(id, { id, nickname });
 
     if (players.size >= maxPlayers) {
-      // 4th player: switch to the countdown immediately, never restart it.
       if (!timer || timer.kind !== "start") startTimer("start", countdownMs);
     } else if (players.size >= MIN_PLAYERS && !timer) {
-      // 2nd (or 3rd) player: the 20 s wait starts once and is never reset.
       startTimer("wait", waitMs);
     }
 
@@ -69,7 +63,6 @@ export function createLobby({
 
   function leave(id) {
     const removed = players.delete(id);
-    // Below 2 players nothing can start; reaching 2 again starts a fresh wait.
     if (removed && players.size < MIN_PLAYERS) timer = null;
     return removed;
   }
@@ -80,7 +73,6 @@ export function createLobby({
     if (now() < timer.endsAt) return null;
 
     if (timer.kind === "wait") {
-      // 2 or 3 players survived the wait: switch to the 10 s countdown.
       startTimer("start", countdownMs);
       return null;
     }
@@ -101,10 +93,18 @@ export function createLobby({
 
     if (timer) {
       const remaining = Math.max(0, timer.endsAt - now());
-      timerView = { kind: timer.kind, secondsLeft: Math.ceil(remaining / 1000) };
+      timerView = {
+        kind: timer.kind,
+        secondsLeft: Math.ceil(remaining / 1000),
+      };
     }
 
-    return { players: list, count: list.length, max: maxPlayers, timer: timerView };
+    return {
+      players: list,
+      count: list.length,
+      max: maxPlayers,
+      timer: timerView,
+    };
   }
 
   return { join, leave, update, view, has: (id) => players.has(id) };

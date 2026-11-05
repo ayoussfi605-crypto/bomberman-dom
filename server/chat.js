@@ -1,6 +1,3 @@
-// server/chat.js
-// Chat text sanitation + per-player chat rate limiting (PROTOCOL.md §2).
-
 import {
   CHAT_MAX_LEN,
   CHAT_RATE_MAX,
@@ -8,7 +5,6 @@ import {
 } from "../shared/constants.js";
 import { createRateLimiter } from "./net/rateLimit.js";
 
-// Control characters (including newlines/tabs) are never rendered.
 const CONTROL_CHARS = /[\u0000-\u001f\u007f-\u009f]/g;
 
 /**
@@ -24,7 +20,6 @@ export function sanitizeText(raw) {
   return text.length > CHAT_MAX_LEN ? text.slice(0, CHAT_MAX_LEN) : text;
 }
 
-/** One sliding window per player id. */
 export function createChatGate({
   now = () => Date.now(),
   limit = CHAT_RATE_MAX,

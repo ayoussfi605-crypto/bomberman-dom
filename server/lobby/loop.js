@@ -1,11 +1,7 @@
-// server/lobby/loop.js
-// Drift-corrected fixed-step loop. A bare setInterval(step, 33) drifts; an
-// accumulator over process.hrtime.bigint() keeps the simulation rate exact.
-
 import { TICK_MS } from "../../shared/constants.js";
 
-const SCHEDULE_MS = 5; // how often we look at the clock
-const MAX_CATCH_UP = 5; // never replay more than 5 ticks after a stall
+const SCHEDULE_MS = 5;
+const MAX_CATCH_UP = 5;
 
 export function createLoop(
   stepFn,
@@ -37,7 +33,6 @@ export function createLoop(
       carry -= tickNs;
       steps += 1;
     }
-    // A long stall (laptop sleep, debugger) must not replay minutes of ticks.
     if (carry >= tickNs) carry %= tickNs;
 
     for (let i = 0; i < steps; i += 1) stepFn(tickMs);

@@ -36,7 +36,9 @@ const MIME = {
 };
 
 function mimeType(filePath) {
-  return MIME[path.extname(filePath).toLowerCase()] ?? "application/octet-stream";
+  return (
+    MIME[path.extname(filePath).toLowerCase()] ?? "application/octet-stream"
+  );
 }
 
 function sendText(res, status, text, method) {
@@ -78,7 +80,8 @@ function resolveFile(rawPath) {
 
 async function handleRequest(req, res) {
   const method = req.method ?? "GET";
-  if (method !== "GET" && method !== "HEAD") return sendText(res, 405, "Method Not Allowed", method);
+  if (method !== "GET" && method !== "HEAD")
+    return sendText(res, 405, "Method Not Allowed", method);
 
   const rawPath = (req.url ?? "/").split("?")[0].split("#")[0] || "/";
   const target = resolveFile(rawPath);
@@ -112,7 +115,8 @@ export function createAppServer({ logger = console, room: injectedRoom } = {}) {
   const server = http.createServer((req, res) => {
     handleRequest(req, res).catch((error) => {
       logger.error?.("[http] request failed:", error);
-      if (!res.headersSent) sendText(res, 500, "Internal Server Error", req.method);
+      if (!res.headersSent)
+        sendText(res, 500, "Internal Server Error", req.method);
       else res.destroy();
     });
   });
@@ -175,7 +179,9 @@ async function loadGameFactory(logger) {
       return module.createGame;
     }
   } catch {
-    logger.log?.("[room] engine not available yet (server/game/game.js is missing)");
+    logger.log?.(
+      "[room] engine not available yet (server/game/game.js is missing)",
+    );
   }
   return undefined;
 }
