@@ -33,43 +33,37 @@ export function createNicknameScreen(state, onSubmit) {
 
 // 2. Render Lobby Waiting Room Screen
 export function createLobbyScreen(state) {
-  const container = document.createElement('div');
-  container.className = 'screen-card lobby-card';
-
   const count = state.players.length;
   const timerText = state.lobbyTimer !== null 
     ? `Match starting in: ${state.lobbyTimer}s` 
     : 'Waiting for players to join...';
 
-  // Generate 4 slots
-  let slotsHTML = '';
+  const playerSlots = [];
   for (let i = 0; i < 4; i++) {
     const player = state.players[i];
     if (player) {
-      slotsHTML += `
-        <div class="player-slot filled" style="border-color: var(--p${i}-color);">
-          <span class="color-indicator p${i}-bg"></span>
-          <span>${player.nickname} ${player.id === state.user.id ? '(YOU)' : ''}</span>
-        </div>
-      `;
+      playerSlots.push(
+        h('div', { class: 'player-slot filled', style: `border-color: var(--p${i}-color);` },
+          h('span', { class: `color-indicator p${i}-bg` }),
+          h('span', {}, `${player.nickname} ${player.id === state.user.id ? '(YOU)' : ''}`)
+        )
+      );
     } else {
-      slotsHTML += `
-        <div class="player-slot">
-          <span class="color-indicator" style="background-color: var(--text-muted)"></span>
-          <span style="color: var(--text-muted)">Waiting...</span>
-        </div>
-      `;
+      playerSlots.push(
+        h('div', { class: 'player-slot' },
+          h('span', { class: 'color-indicator', style: 'background-color: var(--text-muted)' }),
+          h('span', { style: 'color: var(--text-muted)' }, 'Waiting...')
+        )
+      );
     }
   }
 
-  container.innerHTML = `
-    <h1 class="screen-title">LOBBY ROOM</h1>
-    <div class="counter-badge">${count} / 4 PLAYERS</div>
-    <div class="timer-badge">${timerText}</div>
-    <div class="player-list">${slotsHTML}</div>
-  `;
-
-  return container;
+  return h('div', { class: 'screen-card lobby-card' },
+    h('h1', { class: 'screen-title' }, 'LOBBY ROOM'),
+    h('div', { class: 'counter-badge' }, `${count} / 4 PLAYERS`),
+    h('div', { class: 'timer-badge' }, timerText),
+    h('div', { class: 'player-list' }, ...playerSlots)
+  );
 }
 
 /**
