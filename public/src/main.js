@@ -1,3 +1,7 @@
+/* ==========================================
+   MAIN ENTRY POINT & SPA ROUTER
+   ========================================== */
+
 import { render } from './framework/index.js';
 import { store, storeActions } from './state/store.js';
 import { 
@@ -14,7 +18,6 @@ const appContainer = document.getElementById('app');
 function renderApp(state) {
   if (!appContainer) return;
 
-  // Helper to construct Chat VNode cleanly
   const chatVNode = createChatPanel(state, (messageText) => {
     storeActions.addChatMessage({
       sender: state.user.nickname || 'Player',
@@ -31,7 +34,7 @@ function renderApp(state) {
       vnode = createNicknameScreen(state, (nickname) => {
         storeActions.setUserNickname(nickname);
         storeActions.setScreen('lobby');
-        storeActions.setPlayers([{ id: '1', nickname, isReady: true }]);
+        storeActions.setPlayers([{ id: '1', nickname: nickname, isReady: true }]);
       });
       break;
 
@@ -40,7 +43,6 @@ function renderApp(state) {
       break;
 
     case 'game':
-      // Pass Chat VNode directly into Game Screen!
       vnode = createGameScreen(state, chatVNode);
       break;
 
@@ -59,9 +61,21 @@ function renderApp(state) {
 }
 
 function initApp() {
+  // Start FPS Meter overlay
   initFPSMeter('fps-meter');
-  store.subscribe((state) => renderApp(state));
-  renderApp(store.get());
+
+  // Subscribe render function to store changes
+  store.subscribe((state) => {
+    renderApp(state);
+  });
+
+  // Execute initial render using getState()
+  renderApp(store.getState());
 }
 
-document.addEventListener('DOMContentLoaded', initApp);
+// Safely execute initApp regardless of script load state
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
