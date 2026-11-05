@@ -14,9 +14,9 @@ export function createChatPanel(state, onSendMessage) {
     h('div', { class: 'chat-messages', id: 'chat-messages' }, ...messagesVNodes),
     h('form', {
       class: 'chat-form',
-      onsubmit: (e) => {
+      onSubmit: (e) => { // CamelCase onSubmit!
         e.preventDefault();
-        const input = e.target.querySelector('#chat-input');
+        const input = document.getElementById('chat-input');
         if (input && input.value.trim()) {
           onSendMessage(input.value.trim());
           input.value = '';
@@ -30,8 +30,8 @@ export function createChatPanel(state, onSendMessage) {
         placeholder: 'Type a message...',
         maxlength: '100',
         autocomplete: 'off',
-        onkeydown: (e) => e.stopPropagation(),
-        onkeyup: (e) => e.stopPropagation()
+        onKeyDown: (e) => e.stopPropagation(), 
+        onKeyUp: (e) => e.stopPropagation()    
       }),
       h('button', { type: 'submit', class: 'chat-submit-btn' }, 'SEND')
     )
