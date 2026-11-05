@@ -1,0 +1,85 @@
+/* ==========================================
+   CHAT UI STYLING
+   ========================================== */
+
+.chat-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background-color: var(--panel-bg);
+  border: 2px solid var(--panel-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.chat-header {
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--panel-border);
+  text-transform: uppercase;
+}
+
+/* Scrollable Messages List */
+.chat-messages {
+  flex: 1;
+  padding: 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 380px;
+}
+
+.chat-message {
+  font-size: 0.85rem;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.chat-message .sender {
+  font-weight: bold;
+  margin-right: 6px;
+}
+
+.chat-message .timestamp {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-left: 6px;
+}
+
+/* Chat Input Form */
+.chat-form {
+  display: flex;
+  border-top: 1px solid var(--panel-border);
+  background-color: var(--bg-color);
+}
+
+.chat-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 10px 12px;
+  color: var(--text-main);
+  font-family: var(--font-retro);
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.chat-submit-btn {
+  background-color: var(--panel-border);
+  color: var(--text-main);
+  border: none;
+  padding: 0 14px;
+  font-family: var(--font-retro);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.chat-submit-btn:hover {
+  background-color: var(--accent-color);
+}

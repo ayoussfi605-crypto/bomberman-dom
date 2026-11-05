@@ -1,0 +1,179 @@
+/* ==========================================
+   SCREENS & UI COMPONENTS STYLING
+   ========================================== */
+
+/* Shared Card Wrapper */
+.screen-card {
+  background-color: var(--panel-bg);
+  border: 2px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 32px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+.screen-title {
+  font-size: 2rem;
+  color: var(--accent-color);
+  margin-bottom: 24px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* 1. Nickname Screen */
+.nickname-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.nickname-input {
+  background-color: var(--bg-color);
+  border: 2px solid var(--panel-border);
+  border-radius: 6px;
+  padding: 14px 18px;
+  color: var(--text-main);
+  font-family: var(--font-retro);
+  font-size: 1.1rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.nickname-input:focus {
+  border-color: var(--accent-color);
+}
+
+.btn-primary {
+  background-color: var(--accent-color);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 14px;
+  font-family: var(--font-retro);
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.1s, background-color 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: #ff6b81;
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.error-badge {
+  color: var(--p0-color);
+  font-size: 0.9rem;
+  margin-top: 8px;
+}
+
+/* 2. Lobby Screen */
+.lobby-card {
+  max-width: 650px;
+}
+
+.counter-badge {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: var(--p1-color);
+  margin: 16px 0;
+}
+
+.timer-badge {
+  font-size: 1.2rem;
+  color: var(--p3-color);
+  margin-bottom: 24px;
+}
+
+.player-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.player-slot {
+  background-color: var(--bg-color);
+  border: 2px dashed var(--panel-border);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1rem;
+}
+
+.player-slot.filled {
+  border-style: solid;
+}
+
+.color-indicator {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+
+/* Game Screen Master Layout */
+.game-screen-layout {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Top Stats Bar */
+.players-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+
+.player-stat-card {
+  background-color: var(--panel-bg);
+  border: 2px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  font-size: 0.9rem;
+}
+
+/* Main Split: Board vs Sidebar */
+.game-main-content {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+  align-items: flex-start;
+}
+
+/* Reserved Game Board Container */
+.game-board-container {
+  flex: 1;
+  aspect-ratio: 1 / 1; /* Square grid ratio */
+  background-color: #000;
+  border: 3px solid var(--panel-border);
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Reserved Chat Sidebar Container */
+.chat-sidebar-container {
+  width: 320px;
+  height: 500px;
+  display: flex;
+  flex-direction: column;
+}
+.p0-bg { background-color: var(--p0-color); }
+.p1-bg { background-color: var(--p1-color); }
+.p2-bg { background-color: var(--p2-color); }
+.p3-bg { background-color: var(--p3-color); }

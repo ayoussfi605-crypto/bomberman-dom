@@ -1,34 +1,67 @@
-// M0 smoke page. Ayoub replaces this with initUI/initGame/socket wiring in M1.
-import { h, render } from "./framework/index.js";
-import { createSocket } from "./net/socket.js";
+import { render } from './framework/index.js';
+import { store, storeActions } from './state/store.js';
+import { 
+  createNicknameScreen, 
+  createLobbyScreen, 
+  createGameScreen, 
+  createGameOverScreen 
+} from './components/screens.js';
+import { createChatPanel } from './components/chatPanel.js';
+import { initFPSMeter } from './components/fpsMeter.js';
 
-const socket = createSocket();
+const appContainer = document.getElementById('app');
 
-socket.connect();
+function renderApp(state) {
+  if (!appContainer) return;
 
-function Handleclick() {
-  console.log("click");
+  // Helper to construct Chat VNode cleanly
+  const chatVNode = createChatPanel(state, (messageText) => {
+    storeActions.addChatMessage({
+      sender: state.user.nickname || 'Player',
+      text: messageText,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      colorIndex: 0
+    });
+  });
 
-  socket.send("join", { nickname: "heloo" });
+  let vnode = null;
+
+  switch (state.currentScreen) {
+    case 'nickname':
+      vnode = createNicknameScreen(state, (nickname) => {
+        storeActions.setUserNickname(nickname);
+        storeActions.setScreen('lobby');
+        storeActions.setPlayers([{ id: '1', nickname, isReady: true }]);
+      });
+      break;
+
+    case 'lobby':
+      vnode = createLobbyScreen(state, chatVNode);
+      break;
+
+    case 'game':
+      // Pass Chat VNode directly into Game Screen!
+      vnode = createGameScreen(state, chatVNode);
+      break;
+
+    case 'gameover':
+      vnode = createGameOverScreen(state, () => {
+        storeActions.setScreen('lobby');
+      });
+      break;
+
+    default:
+      vnode = createNicknameScreen(state, () => {});
+  }
+
+  // Framework's VDOM render call
+  render(vnode, appContainer);
 }
 
-function HandleSendMessage() {
-  socket.send("chat", { text: "fiiiine" });
+function initApp() {
+  initFPSMeter('fps-meter');
+  store.subscribe((state) => renderApp(state));
+  renderApp(store.get());
 }
-//
 
-render(
-  h(
-    "main",
-    { class: "starter" },
-    h("h1", {}, "Bomberman DOM"),
-    h(
-      "p",
-      {},
-      "The development starter is ready. Multiplayer gameplay is under construction.",
-    ),
-    h("button", { onClick: Handleclick }, "Run framework checks"),
-    h("button", { onClick: HandleSendMessage }, "send Message"),
-  ),
-  document.getElementById("app"),
-);
+document.addEventListener('DOMContentLoaded', initApp);
