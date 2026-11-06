@@ -19,10 +19,10 @@ let _clockSet = false;
 const _snapshots = [];
 
 const _framePlayers = [
-  { slot: 0, x: 0, y: 0, dir: null, moving: false, alive: true, lives: 3, invulnerable: false, maxBombs: 1, range: 2, speedLevel: 0 },
-  { slot: 1, x: 0, y: 0, dir: null, moving: false, alive: true, lives: 3, invulnerable: false, maxBombs: 1, range: 2, speedLevel: 0 },
-  { slot: 2, x: 0, y: 0, dir: null, moving: false, alive: true, lives: 3, invulnerable: false, maxBombs: 1, range: 2, speedLevel: 0 },
-  { slot: 3, x: 0, y: 0, dir: null, moving: false, alive: true, lives: 3, invulnerable: false, maxBombs: 1, range: 2, speedLevel: 0 },
+  { slot: 0, present: false, nickname: "", x: 0, y: 0, dir: null, moving: false, alive: true, lives: 3, invulnerable: false, maxBombs: 1, range: 2, speedLevel: 0 },
+  { slot: 1, present: false, nickname: "", x: 0, y: 0, dir: null, moving: false, alive: true, lives: 3, invulnerable: false, maxBombs: 1, range: 2, speedLevel: 0 },
+  { slot: 2, present: false, nickname: "", x: 0, y: 0, dir: null, moving: false, alive: true, lives: 3, invulnerable: false, maxBombs: 1, range: 2, speedLevel: 0 },
+  { slot: 3, present: false, nickname: "", x: 0, y: 0, dir: null, moving: false, alive: true, lives: 3, invulnerable: false, maxBombs: 1, range: 2, speedLevel: 0 },
 ];
 
 const _frameResult = { tiles: _tiles, tilesVersion: _tilesVersion, players: _framePlayers };
@@ -41,10 +41,15 @@ export function reset(startData) {
   _snapshots.length = 0;
   _clockSet = false;
 
+  const bySlot = new Map((startData.players ?? []).map((p) => [p.slot, p]));
+
   for (let slot = 0; slot < 4; slot++) {
     const corner = CORNER_BY_SLOT[slot];
     const fp = _framePlayers[slot];
+    const start = bySlot.get(slot);
     fp.slot = slot;
+    fp.present = Boolean(start);
+    fp.nickname = start?.nickname ?? "";
     fp.x = corner.x + 0.5;
     fp.y = corner.y + 0.5;
     fp.dir = null;
@@ -153,7 +158,11 @@ export function getFrame(nowMs) {
     const pB = snapB.players.find(p => p.slot === slot);
     const pNewest = newest.players.find(p => p.slot === slot);
 
-    if (!pNewest) continue;
+    if (!pNewest) {
+      fp.present = false;
+      continue;
+    }
+    fp.present = true;
     copyPlayerFields(fp, pNewest);
 
     if (!pA || !pB) {
@@ -183,7 +192,11 @@ function applySnapshot(snap) {
     const fp = _framePlayers[slot];
     fp.slot = slot;
     const p = snap.players.find(pl => pl.slot === slot);
-    if (!p) continue;
+    if (!p) {
+      fp.present = false;
+      continue;
+    }
+    fp.present = true;
     fp.x = p.x;
     fp.y = p.y;
     copyPlayerFields(fp, p);

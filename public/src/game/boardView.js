@@ -46,7 +46,7 @@ function buildPlayerClass(slot, p) {
 function playerVNode(slot, frame) {
   const p = frame.players.find(pl => pl.slot === slot);
 
-  if (p == null) {
+  if (p == null || p.present === false) {
     return h("div", { class: `player p${slot}`, hidden: true });
   }
 
