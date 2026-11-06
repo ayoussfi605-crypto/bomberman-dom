@@ -6,6 +6,7 @@ import {
   FLAME_MS,
   PLAYER_HITBOX_HALF,
 } from "../../shared/constants.js";
+import { revealHidden } from "./powerups.js";
 
 const DIRECTIONS = [
   { dx: 0, dy: -1 }, // up
@@ -100,11 +101,7 @@ function explodeBomb(game, bomb, now, queue) {
 
       if (tile === TILE.BLOCK) {
         // Remember the hidden item. It appears when the flame ends.
-        const powerup = game.hidden.get(cell);
-        if (powerup !== undefined) {
-          game.reveals.set(cell, powerup);
-          game.hidden.delete(cell);
-        }
+        revealHidden(game, cell);
         addFlame(game, cell, now);
         break;
       }

@@ -8,6 +8,7 @@ import {
 import { generateMap } from "./map.js";
 import { movePlayer } from "./movement.js";
 import { createPlayer } from "./player.js";
+import { pickupPowerup } from "./powerups.js";
 
 const VALID_DIRECTIONS = new Set(Object.values(DIR));
 const MAX_SUB_STEP_MS = 100;
@@ -90,7 +91,10 @@ export function createGame(players = [], seed = 0) {
     }
     updateBombPassability(world);
 
-    // Power-ups are added in the next step.
+    for (const player of playerList) {
+      if (player.alive) pickupPowerup(world, player);
+    }
+
     updateBombs(world, timeMs);
     updateFlames(world, timeMs);
 
