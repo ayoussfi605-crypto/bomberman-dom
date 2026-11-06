@@ -13,7 +13,8 @@ const initialState = {
   players: [],
   lobbyTimer: null,
   chatMessages: [],
-  connectionError: null
+  connectionError: null,
+  winner: null
 };
 
 // Instantiating State with microtask batching as defined in your framework
@@ -48,5 +49,9 @@ export const storeActions = {
 
   setError(errorMsg) {
     store.setState({ connectionError: errorMsg });
+  },
+
+  setWinner(winner) {
+    store.setState({ winner });
   }
 };
