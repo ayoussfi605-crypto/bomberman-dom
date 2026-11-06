@@ -1,4 +1,10 @@
 import { DIR } from "../../shared/constants.js";
+import {
+  placeBomb as placeBombInWorld,
+  updateBombPassability,
+  updateBombs,
+  updateFlames,
+} from "./bombs.js";
 import { generateMap } from "./map.js";
 import { movePlayer } from "./movement.js";
 import { createPlayer } from "./player.js";
@@ -12,7 +18,6 @@ function round3(value) {
 
 export function createGame(players = [], seed = 0) {
   const { tiles, hidden } = generateMap(seed);
-  const world = { tiles, hidden };
 
   const playerList = players.map(({ slot, nickname }) =>
     createPlayer(slot, nickname),
@@ -21,9 +26,20 @@ export function createGame(players = [], seed = 0) {
     playerList.map((player) => [player.slot, player]),
   );
 
+  const world = {
+    tiles,
+    hidden,
+    players: playerList,
+    playersBySlot,
+    bombs: [],
+    bombsByCell: new Map(),
+    flames: new Map(),
+    reveals: new Map(),
+    tileDirty: false,
+  };
+
   let tick = 0;
   let timeMs = 0;
-  let tileDirty = false;
 
   function setInput(slot, dir) {
     const player = playersBySlot.get(slot);
@@ -35,7 +51,10 @@ export function createGame(players = [], seed = 0) {
   }
 
   function placeBomb(slot) {
-    // Bombs are added in a later step.
+    const player = playersBySlot.get(slot);
+    if (!player) return;
+
+    placeBombInWorld(world, player, timeMs);
   }
 
   function removePlayer(slot) {
@@ -58,8 +77,8 @@ export function createGame(players = [], seed = 0) {
       simulate(subStep);
     }
 
-    const changed = tileDirty;
-    tileDirty = false;
+    const changed = world.tileDirty;
+    world.tileDirty = false;
     return { tilesChanged: changed };
   }
 
@@ -69,8 +88,13 @@ export function createGame(players = [], seed = 0) {
     for (const player of playerList) {
       movePlayer(world, player, dtMs / 1000);
     }
+    updateBombPassability(world);
 
-    // Power-ups, bombs and damage are added in the next steps.
+    // Power-ups are added in the next step.
+    updateBombs(world, timeMs);
+    updateFlames(world, timeMs);
+
+    // Damage and eliminations are added in the next step.
     tick += 1;
   }
 
