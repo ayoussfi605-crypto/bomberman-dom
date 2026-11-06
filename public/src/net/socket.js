@@ -47,7 +47,7 @@ export function createSocket({ url } = {}) {
 
     setStatus("connecting");
 
-    const socket = new WebSocket("ws://localhost:8080/");
+    const socket = new WebSocket(resolveUrl());
     ws = socket;
 
     socket.onopen = () => {
