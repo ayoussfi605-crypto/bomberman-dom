@@ -1,6 +1,7 @@
 import { h, render } from "../framework/index.js";
 import * as gameView from "./gameView.js";
 import { getTilesVNode, getPlayersVNode } from "./boardView.js";
+import { hudVNode as renderHud } from "./hud.js";
 
 let _running = false;
 let _rafId = null;
@@ -18,12 +19,14 @@ export function init({ store, fpsMeter, chatPanel, perfOverlay }) {
 
 function gameScreen(f) {
   const state = _store.getState();
+  const hud          = renderHud(f, state.me?.slot);
   const tilesVNode   = getTilesVNode(f);
   const playersVNode = getPlayersVNode(f);
   const chatVNode    = _chatPanel(state.chat);
   const perf         = _perfOverlay();
 
   return h("div", { class: "game" },
+    hud,
     h("div", { class: "board" }, tilesVNode, playersVNode),
     chatVNode,
     perf,
