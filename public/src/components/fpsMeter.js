@@ -9,6 +9,9 @@
 export function initFPSMeter(containerId = 'fps-meter') {
   const container = document.getElementById(containerId);
   if (!container) return;
+  const debugEnabled = new URLSearchParams(location.search).has('debug');
+  container.hidden = !debugEnabled;
+  if (!debugEnabled) return;
 
   let frameCount = 0;
   let lastTime = performance.now();
@@ -25,7 +28,7 @@ export function initFPSMeter(containerId = 'fps-meter') {
       frameTime = (delta / frameCount).toFixed(1);
 
       // Render readout text
-      container.innerHTML = `FPS: ${fps} | ${frameTime}ms`;
+      container.textContent = `FPS: ${fps} | ${frameTime}ms`;
 
       // Dynamic color coding based on performance threshold
       if (fps >= 55) {
