@@ -119,6 +119,8 @@ function explodeBomb(game, bomb, now, queue) {
 }
 
 export function updateBombs(game, now) {
+  if (game.bombs.length === 0) return;
+
   const queue = [];
 
   for (const bomb of game.bombs) {
@@ -143,6 +145,8 @@ export function updateBombs(game, now) {
 }
 
 export function updateFlames(game, now) {
+  if (game.flames.size === 0) return;
+
   for (const [cell, expiresAt] of game.flames) {
     if (expiresAt > now) continue;
 

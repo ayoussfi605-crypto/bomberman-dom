@@ -5,6 +5,7 @@ import {
   updateBombs,
   updateFlames,
 } from "./bombs.js";
+import { applyFlameDamage } from "./damage.js";
 import { generateMap } from "./map.js";
 import { movePlayer } from "./movement.js";
 import { createPlayer } from "./player.js";
@@ -97,8 +98,8 @@ export function createGame(players = [], seed = 0) {
 
     updateBombs(world, timeMs);
     updateFlames(world, timeMs);
+    applyFlameDamage(world, timeMs);
 
-    // Damage and eliminations are added in the next step.
     tick += 1;
   }
 
