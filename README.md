@@ -1,11 +1,11 @@
-# Bomberman DOM — team starter
+# Bomberman DOM
 
-A 2–4 player DOM Bomberman using our mini-framework and WebSockets.
-This commit prepares the team to begin implementation; it is not a playable game.
+A 2–4 player Bomberman project built with the team's DOM mini-framework and a
+WebSocket server.
 
-## Start here
+## Install and run
 
-Use Node.js 20+ and npm. From the repository root:
+Requires Node.js 20+.
 
 ```sh
 npm ci
@@ -13,73 +13,31 @@ npm test
 npm start
 ```
 
-Open http://localhost:8080/ for the starter page and
-http://localhost:8080/dev/framework-check.html for browser framework checks.
-Use `PORT=8081 npm start` if 8080 is occupied.
+Open [http://localhost:8080](http://localhost:8080). Use
+`http://localhost:8080/?fake=1` to exercise the scripted lobby and UI without
+waiting for other players. The fake advances through the lobby countdown and
+emits a sample match/result. Use `?debug` to show the rolling FPS and frame-time
+overlay. For a real server session, open multiple browser profiles at the
+normal URL and join with different nicknames. Use four independent profiles
+for four-player checks; keep measured clients in foreground tabs during
+performance recordings.
 
-With Chrome installed, `npm run test:browser` runs the same browser checks
-automatically. For Chromium or a custom location, set `CHROME_BIN` to its
-executable. This optional local headless check uses a temporary browser profile.
-
-Included: a static server, page/CSS starter, shared constants, the patched runtime
-framework, automated state/server checks, and browser verification checks.
-WebSocket transport, nickname/lobby/chat, the game engine and game renderer are
-still assigned work. `?fake=1` and `?debug` become available when their owners
-implement them; they are not features of this starter.
-
-## Read before coding
-
-1. [Objective and audit](bomberman-dom.md).
-2. [Architecture, interfaces, and shared milestones](docs/ARCHITECTURE.md).
-3. [WebSocket protocol](docs/PROTOCOL.md).
-4. Your task file below, plus [shared constants](shared/constants.js).
-
-| Owner | Start with | First deliverable |
-|---|---|---|
-| Ayoub | [App/UI tasks](docs/TASKS_AYOUB.md) | Store, UI entry point, nickname/lobby/chat, early chat/performance exports. |
-| Hichame | [Client game tasks](docs/TASKS_HICHAME.md) | Static board and four stable player slots; then interpolation/input. Maintain framework checks. |
-| Mohamed | [Engine tasks](docs/TASKS_MOHAMED.md) | Deterministic map with guaranteed first-bomb escape, full engine API skeleton. |
-| Yacobe | [Network tasks](docs/TASKS_YACOBE.md) | Socket APIs and small fake; integrate real two-browser join/chat. Coordinate protocol/integration. |
-
-Build order: **real two-browser lobby/chat → real timers and engine skeleton →
-complete two-player match → four-player and replay/disconnect/performance audit**.
-Keep integrating small PRs; do not finish every module separately before trying
-real multiplayer. The protocol remains an integration draft until M1 passes;
-changes to shared interfaces need affected owners to review them.
-
-## Framework readiness
-
-**The prerequisite patches are already applied. Your friends can start.**
-Use `public/src/framework/` as the maintained runtime. It supports style objects,
-cached immutable vnodes, global `listen()` cleanup, recursive event cleanup, and
-opt-in state batching. [Framework API](public/src/framework/README.md) and
-[patch record](docs/FRAMEWORK_PATCH.md) explain the behaviour and checks.
-
-The default `State` still notifies synchronously. Bomberman's store must opt in:
-
-```js
-new State(initialState, { batch: "microtask" });
-```
-
-**All framework imports and changes belong in `public/src/framework/`.**
-There is one framework copy in this repository. The supplied source did not
-include TodoMVC, so no original TodoMVC regression fixture is available.
-
-## Working together
-
-Start each task from the integrated `main`, using your own branch:
+The optional browser framework check is:
 
 ```sh
-git switch main
-git pull --ff-only
-git switch -c your-name/your-task
+npm run test:browser
 ```
 
-Follow the file ownership in the architecture. Yacobe coordinates integration;
-Hichame maintains the framework. Each PR describes behaviour, validation, and
-which objective/audit item it supports. Run `npm test`; framework changes also
-require the browser verification page. Avoid committing dependencies, generated
-profiles, or secrets. GitHub branch protection must be configured separately.
+Set `CHROME_BIN` if Chrome/Chromium is not on the default executable path.
 
-Ayoub maintains the project README and final audit record as implementation
-progresses. The audit checklist distinguishes planned work from verified work.
+## Current scope and testing
+
+The app shell includes nickname entry, lobby player/timer display, WebSocket
+chat, result display, the fake transport, and debug performance instrumentation.
+The match board/engine and a full real multiplayer match still depend on the
+game and server integration work. See [the audit checklist](docs/AUDIT_CHECKLIST.md)
+for automated results and checks that still require browsers, DevTools, or the
+integrated game.
+
+Read [the architecture](docs/ARCHITECTURE.md), [the WebSocket protocol](docs/PROTOCOL.md),
+and [Ayoub's app/UI task](docs/TASKS_AYOUB.md) before changing shared interfaces.

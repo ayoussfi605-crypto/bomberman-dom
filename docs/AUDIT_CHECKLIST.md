@@ -1,34 +1,30 @@
-# Audit checklist — implementation pending
+# Audit checklist
 
-This starter does not pass the game audit yet. Ayoub maintains this record;
-each owner records results and evidence as the relevant milestone lands.
+Record browser, OS, viewport, player count, recording duration, result, and
+trace/screenshot links for every manual run. Automated passes do not replace
+real-browser or integrated-match evidence.
 
-| Check | How to verify / expected result | Owner | Status |
+| Check | How to test / expected result | Owner | Status / evidence |
 |---|---|---|---|
-| Framework prerequisite | `npm test`; browser `/dev/framework-check.html` all PASS | Hichame | See framework patch record; game performance still pending |
-| Allowed rendering | Inspect application imports and DOM; only our framework, no canvas/WebGL/other client framework | Hichame + Ayoub | Pending |
-| Nickname and waiting page | New browser asks for nickname, then shows counter and chat | Ayoub | Pending |
-| Counter and real chat | Join in second browser/private window; counter increments; messages work both ways via WS | Yacobe + Ayoub | Pending |
-| Two-player timers | From second join, wait 20 s; then 10 s countdown; game starts | Yacobe | Pending |
-| Four-player timer | Fourth join immediately starts 10 s countdown | Yacobe | Pending |
-| Lobby cancellation | Drop below two during wait/countdown; cancel; second join starts fresh wait | Yacobe | Pending |
-| Map and controls | All map visible; corner spawns; movement and bomb placement work | Hichame + Mohamed | Pending |
-| First-bomb escape | All four starting corners have a traversable safe route beyond default blast before fuse expires | Mohamed | Pending |
-| Lives and elimination | Own bomb costs one of three lives; another player can take damage; zero lives disables play | Mohamed | Pending |
-| Blocks and power-ups | Destroy blocks; power-ups appear; all three types exist and affect stats | Mohamed | Pending |
-| Chain and dirty flag | Chain reactions resolve once per bomb; placement between ticks appears on every client | Mohamed + Yacobe | Pending |
-| Input/chat focus | Hold movement, focus chat by Enter/click, release key; movement stops and typing does not move | Hichame | Pending |
-| Interpolation | 30 Hz snapshots produce smooth motion; test jitter/catch-up/stale data and measure actual control latency | Hichame | Pending |
-| Finish and replay | Winner/draw agrees across clients; second full match has no stale slots, timers or duplicate loops | Whole team | Pending |
-| Disconnects | Close/refresh a player; lobby updates or player is eliminated; local closed socket exits stale gameplay | Yacobe + Hichame | Pending |
-| Transport robustness | Malformed/rate-limited messages do not affect other users; oversized frames close with 1009; heartbeat removes silent peers | Yacobe | Pending |
-| Frame rate | Record active gameplay in foreground, including bombs/chat; inspect dropped frames and ~60 fps on documented hardware/browser | Hichame + Ayoub | Pending |
-| Paint | Paint flashing: changed cells may paint; composited movement should ideally avoid repaint; unchanged board/HUD/chat do not repaint each frame | Hichame | Pending |
-| Layers | Inspect Layers panel; a small number of layers, no promotion of all 195 cells | Hichame | Pending |
-| Memory | Repeated matches/disconnects do not accumulate listeners, loops, snapshot history or fake timers | Whole team | Pending |
+| Allowed rendering | Search runtime files for `canvas`, `getContext`, `webgl`, `innerHTML`, `<svg`, and non-framework imports; inspect matches. User content must render as text. | Hichame + Ayoub | Pass: `rg` scan of `public/src`, `public/styles`, and `public/index.html` found no restricted API matches (2026-11-06) |
+| Nickname and waiting room | Open `/?fake=1`, join with a nickname; nickname form disappears and the lobby counter, player list, timer, and chat appear. Try `taken` to check the error path. | Ayoub | Pass: browser smoke test joined `BrowserTest`; rejected `taken` displayed the error (2026-11-06) |
+| Lobby count and chat | With `/?fake=1`, watch bot joins update the count and send chat; in real mode use two browsers and exchange messages. | Yacobe + Ayoub | Pass: fake browser flow and real single-client server chat echo; two-browser run pending (2026-11-06) |
+| Lobby timers | Fake mode follows wait → start → match; real mode: two players wait 20 s then count down 10 s; fourth player switches immediately to the 10 s countdown. | Yacobe + Ayoub | Short-timer fake test; real timer run pending |
+| Nickname rejection and replay | Try invalid/taken names; rejected join returns to nickname with an error. After result, Back to lobby sends the remembered nickname; server response controls the transition. | Ayoub + Yacobe | Handler unit tests; real-server replay pending |
+| In-game chat and focus | During an integrated match, send chat from both lobby and game; Enter sends, Escape blurs, and typing does not move the player. | Ayoub + Hichame | Component implemented; game renderer/focus integration pending |
+| Map and controls | Start a real match; inspect complete map, corner spawns, movement, and bomb placement. | Hichame + Mohamed | Pending game integration |
+| First-bomb escape | Verify all four spawn corners have a traversable safe route outside the default blast before fuse expiry. | Mohamed | Pending engine verification |
+| Lives, elimination, blocks, power-ups | Verify bomb damage, three-life elimination, block destruction, and all three power-up types and effects. | Mohamed | Pending engine verification |
+| Chain reactions and tile updates | Place bombs between ticks and cause a chain; each bomb resolves once and all clients receive the updated full tile array. | Mohamed + Yacobe | Pending real match |
+| Interpolation and stale data | Inspect motion at 30 Hz under jitter/catch-up; measure control latency and ensure stale/disconnected gameplay stops. | Hichame + Yacobe | Pending game integration |
+| Real multiplayer / disconnects | Four people finish a match, disconnect/refresh players, then play a second match; no stale timers, slots, listeners, or loops. | Whole team | Pending integrated team run |
+| FPS / frame-time overlay | Open `/?debug`; confirm FPS, average/max frame ms, and >20/>33 ms counts update no faster than 4 times/s. | Ayoub + Hichame | Pass: browser showed 60 FPS, 16.7 ms average, 16.8 ms max; 250 ms cache unit-tested (2026-11-06) |
+| DevTools Performance | Record 10 s of foreground gameplay with bombs/chat; target ~60 fps and save the frames chart and trace with hardware/browser details. | Hichame + Ayoub | Pending playable match and captured evidence |
+| Paint flashing | Enable Paint flashing; changed tiles may paint, while composited movement should avoid repainting unchanged board/HUD/chat. | Hichame | Pending playable match |
+| Layers | Inspect Layers panel; keep layer count low and avoid promoting all 195 board cells. | Hichame | Pending playable match |
+| Browser framework check | Run `npm run test:browser` or open `/dev/framework-check.html`; all checks should pass. | Hichame | Run before release; attach output |
 
-Record hardware/browser/viewport, player count, recording duration, result, and
-screenshots/trace links for performance evidence. Background tabs throttle rAF;
-measure foreground tabs and use separate devices where available for four-player
-checks. Debug FPS numbers supplement DevTools recordings; they do not replace them.
-Bonus features are excluded from the initial scope.
+Background tabs throttle animation frames. Use foreground tabs, close unrelated
+applications/extensions, and prefer separate devices for four-player
+performance checks. Debug FPS numbers supplement, not replace, DevTools
+recordings.
