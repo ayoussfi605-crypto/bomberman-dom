@@ -1,5 +1,35 @@
 :root {
-  --tile: min(calc((100vw - 560px) / 15), calc((100vh - 24px) / 13));
+  --tile: min(calc((100vw - 600px) / 15), calc((100vh - 24px) / 13));
+}
+
+.game {
+  width: min(100%, 1100px);
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.game > .chat {
+  width: 260px;
+  flex: 0 0 260px;
+  height: min(500px, calc(var(--tile) * 13));
+}
+
+@media (max-width: 760px) {
+  .game {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .game > .chat {
+    width: 100%;
+    flex-basis: auto;
+    height: 300px;
+  }
 }
 
 .board {

@@ -4,7 +4,9 @@ let _cache = null;
 let _cacheKey = "";
 
 function buildKey(players, me) {
-  const base = players.map(p => `${p.slot}:${p.lives}:${p.alive}`).join("|");
+  const base = players
+    .map(p => `${p.slot}:${p.nickname}:${p.lives}:${p.alive}`)
+    .join("|");
   const myStats = me ? `${me.maxBombs}:${me.range}:${me.speedLevel}` : "null";
   return `${base}|${myStats}`;
 }
@@ -31,7 +33,7 @@ function playerRow(p, isMe) {
 }
 
 export function hudVNode(frame, mySlot) {
-  const { players } = frame;
+  const players = frame.players.filter(p => p.present !== false);
   const me = players.find(p => p.slot === mySlot);
   const key = buildKey(players, me);
 
