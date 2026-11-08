@@ -5,6 +5,7 @@ import { lobbyScreen } from './screens/lobby.js';
 import { overScreen } from './screens/over.js';
 import { perfOverlay } from '../perf/perfOverlay.js';
 import { fpsMeter } from '../perf/fpsMeter.js';
+import { headerVNode } from './components/header.js';
 
 let joinAction = () => {};
 let replayAction = () => {};
@@ -58,7 +59,7 @@ export function renderApp(state) {
     default:
       screen = nicknameScreen(state, joinAction);
   }
-  render(h('div', { class: 'app-shell' }, screen, perfOverlay()), container);
+  render(h('div', { class: 'app-shell' }, headerVNode(), screen, perfOverlay()), container);
 }
 
 export function initRenderer(store, actions) {

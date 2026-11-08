@@ -1,11 +1,12 @@
 :root {
-  color-scheme: dark;
-  --bg: #10131b;
-  --fg: #f3f5fa;
-  --panel: #1a202c;
-  --panel-border: #303b4d;
-  --accent: #ff6b55;
-  --muted: #a4afc0;
+  color-scheme: light;
+  --bg: #ffffff;
+  --fg: #111114;
+  --panel: #ffffff;
+  --panel-border: #e4e4ea;
+  --accent: #111114;
+  --accent-2: #111114;
+  --muted: #8a8a94;
   --p0: #e63946;
   --p1: #2a9df4;
   --p2: #2ecc71;
@@ -19,7 +20,7 @@
   --text-main: var(--fg);
   --text-muted: var(--muted);
   --accent-color: var(--accent);
-  --font-retro: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-retro: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --app-max-width: 1200px;
 }
 
@@ -38,14 +39,17 @@ body {
 
 .app-shell {
   min-height: 100vh;
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   padding: 24px;
 }
 
 button, input { font: inherit; }
 button:focus-visible, input:focus-visible {
-  outline: 2px solid var(--p1);
+  outline: 2px solid #111114;
   outline-offset: 2px;
 }
 
@@ -58,7 +62,8 @@ button:focus-visible, input:focus-visible {
   gap: 2px;
   padding: 8px 10px;
   border: 1px solid var(--panel-border);
-  background: #10131b;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.94);
   color: var(--fg);
   font: 12px/1.35 ui-monospace, monospace;
   pointer-events: none;

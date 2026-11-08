@@ -5,7 +5,7 @@
   min-height: 0;
   height: 100%;
   border: 1px solid var(--panel-border);
-  border-radius: 8px;
+  border-radius: 12px;
   background: var(--panel);
 }
 
@@ -58,4 +58,7 @@
   cursor: pointer;
 }
 
-.chat-submit-btn:hover { background: var(--accent); }
+.chat-submit-btn:hover { background: #111114; color: #ffffff; }
+
+.chat-log::-webkit-scrollbar { width: 8px; }
+.chat-log::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 4px; }

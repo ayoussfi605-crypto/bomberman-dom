@@ -11,6 +11,7 @@ const PREVENT_CODES = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"
 
 let _socket = null;
 let _store  = null;
+let _alive  = true;
 
 const _held = [];
 let _lastDir = null;
@@ -24,7 +25,17 @@ function isEditable(el) {
 function canSend() {
   if (!_store || !_socket) return false;
   const s = _store.getState();
-  return s.screen === "game" && s.me?.alive !== false;
+  return s.screen === "game" && _alive;
+}
+
+// Called by the render loop from the latest snapshot frame: a dead
+// (spectating) player must not send movement or bomb messages.
+export function setAlive(alive) {
+  _alive = Boolean(alive);
+  if (!_alive) {
+    clearHeld();
+    sendDir(null);
+  }
 }
 
 function effectiveDir() {
@@ -46,6 +57,7 @@ function clearHeld() {
 }
 
 export function resetDir() {
+  _alive = true;
   const prev = _lastDir;
   _lastDir = null;
   clearHeld();

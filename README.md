@@ -32,12 +32,14 @@ Set `CHROME_BIN` if Chrome/Chromium is not on the default executable path.
 
 ## Current scope and testing
 
-The app shell includes nickname entry, lobby player/timer display, WebSocket
-chat, result display, the fake transport, and debug performance instrumentation.
-The match board/engine and a full real multiplayer match still depend on the
-game and server integration work. See [the audit checklist](docs/AUDIT_CHECKLIST.md)
-for automated results and checks that still require browsers, DevTools, or the
-integrated game.
+The app is complete end to end: nickname entry, lobby player/timer display,
+WebSocket chat, an authoritative server engine (movement, bombs, chain
+reactions, blocks, the 3 power-up types, 3 lives, last-one-standing), DOM
+board rendering at 60 fps with interpolation, result display, the fake
+transport, and debug performance instrumentation. Bonus modes from the
+subject (solo/co-op AI, extra power-ups, team mode, ghost mode) are not
+implemented. See [the audit checklist](docs/AUDIT_CHECKLIST.md) for results
+and checks that still require a real browser/DevTools recording.
 
 Read [the architecture](docs/ARCHITECTURE.md), [the WebSocket protocol](docs/PROTOCOL.md),
 and [Ayoub's app/UI task](docs/TASKS_AYOUB.md) before changing shared interfaces.

@@ -1,0 +1,75 @@
+/* Bare-white site header with an animated CSS bomb.
+   Animations are transform-only: they composite on the GPU and never
+   repaint tiles, so they do not cost FPS. */
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px 20px 14px;
+}
+
+.header-bomb {
+  position: relative;
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #5a5a66 0%, #17171c 55%, #000 100%);
+  animation: header-bounce 1.4s ease-in-out infinite;
+}
+
+/* Fuse stem */
+.header-bomb::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -7px;
+  width: 3px;
+  height: 9px;
+  margin-left: -1px;
+  background: #8a6a3b;
+  border-radius: 2px;
+  transform: rotate(24deg);
+  transform-origin: bottom center;
+}
+
+.bomb-spark {
+  position: absolute;
+  left: 62%;
+  top: -12px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #ffb020;
+  animation: spark-pulse 0.7s ease-in-out infinite alternate;
+}
+
+.header-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: 0.28em;
+  color: #111114;
+}
+
+.header-sub {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  color: #8a8a94;
+  border: 1px solid #d9d9e0;
+  border-radius: 999px;
+  padding: 3px 10px 3px 12px;
+}
+
+@keyframes header-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+
+@keyframes spark-pulse {
+  from { transform: scale(0.55); opacity: 0.7; }
+  to { transform: scale(1.15); opacity: 1; }
+}
