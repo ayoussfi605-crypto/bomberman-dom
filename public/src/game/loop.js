@@ -36,15 +36,19 @@ function chatVNodeFor(chat) {
 
 function gameScreen(f) {
   const state = _store.getState();
-  const hud          = renderHud(f, state.me?.slot);
-  const tilesVNode   = getTilesVNode(f);
+  const hud = renderHud(f, state.me?.slot);
+  const tilesVNode = getTilesVNode(f);
   const playersVNode = getPlayersVNode(f);
-  const chatVNode    = chatVNodeFor(state.chat);
-  const perf         = _perfOverlay();
+  const chatVNode = chatVNodeFor(state.chat);
+  const perf = _perfOverlay();
 
-  return h("div", { class: "game-page" },
+  return h(
+    "div",
+    { class: "game-page" },
     headerVNode(),
-    h("div", { class: "game" },
+    h(
+      "div",
+      { class: "game" },
       hud,
       h("div", { class: "board" }, tilesVNode, playersVNode),
       perf,

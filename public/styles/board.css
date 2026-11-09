@@ -69,7 +69,8 @@
 
 /* --- Indestructible wall: charcoal block (flat fills raster fast) --- */
 .cell.t-wall {
-  background: linear-gradient(rgba(255, 255, 255, 0.14), rgba(0, 0, 0, 0.22)), #3c3c44;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.14), rgba(0, 0, 0, 0.22)), #3c3c44;
   border: 1px solid #232329;
 }
 
@@ -106,7 +107,12 @@
   height: 66%;
   margin: 17%;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #8a93b8 0%, #2b3050 45%, #0b0e1c 100%);
+  background: radial-gradient(
+    circle at 35% 30%,
+    #8a93b8 0%,
+    #2b3050 45%,
+    #0b0e1c 100%
+  );
 }
 
 .cell.t-bomb::after {
@@ -129,7 +135,13 @@
   display: block;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle, #fff6c9 0%, #ffd23d 35%, #ff7a00 75%, rgba(255, 60, 0, 0.6) 100%);
+  background: radial-gradient(
+    circle,
+    #fff6c9 0%,
+    #ffd23d 35%,
+    #ff7a00 75%,
+    rgba(255, 60, 0, 0.6) 100%
+  );
 }
 
 /* --- Power-ups: glowing badges (emoji glyphs, no image assets) --- */
@@ -196,10 +208,18 @@
   display: none;
 }
 
-.player.p0 { background-image: url("/images/players/player2%20(1).png"); }
-.player.p1 { background-image: url("/images/players/player3%20(1).png"); }
-.player.p2 { background-image: url("/images/players/player1%20(1).png"); }
-.player.p3 { background-image: url("/images/players/player4%20(1).png"); }
+.player.p0 {
+  background-image: url("/images/players/player2%20(1).png");
+}
+.player.p1 {
+  background-image: url("/images/players/player3%20(1).png");
+}
+.player.p2 {
+  background-image: url("/images/players/player1%20(1).png");
+}
+.player.p3 {
+  background-image: url("/images/players/player4%20(1).png");
+}
 
 .player.dead {
   opacity: 0.25;
@@ -224,10 +244,18 @@
 /* Only the players (promoted layers via will-change) keep animations:
    transform/opacity on them composites without repainting tiles. */
 @keyframes step-bob {
-  from { transform: scaleX(0.8); opacity: 0.6; }
-  to { transform: scaleX(1.1); opacity: 0.9; }
+  from {
+    transform: scaleX(0.8);
+    opacity: 0.6;
+  }
+  to {
+    transform: scaleX(1.1);
+    opacity: 0.9;
+  }
 }
 
 @keyframes blink {
-  50% { opacity: 0; }
+  50% {
+    opacity: 0;
+  }
 }

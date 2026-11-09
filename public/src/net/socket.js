@@ -1,7 +1,3 @@
-// public/src/net/socket.js
-// Client WebSocket service. API contract: docs/ARCHITECTURE.md §7.2.
-// No auto-reconnect on purpose: a refresh is a new session.
-
 export function createSocket({ url } = {}) {
   const handlers = new Map();
   const statusHandlers = new Set();
@@ -62,7 +58,7 @@ export function createSocket({ url } = {}) {
       try {
         message = JSON.parse(event.data);
       } catch {
-        return; // ignore malformed frames
+        return; 
       }
 
       if (
@@ -73,10 +69,6 @@ export function createSocket({ url } = {}) {
         return;
 
       dispatch(message.type, message.data);
-    };
-
-    socket.onerror = () => {
-      // The close event that follows drives the status change.
     };
 
     socket.onclose = () => {
@@ -114,7 +106,7 @@ export function createSocket({ url } = {}) {
     statusHandlers.add(callback);
 
     try {
-      callback(status); // called immediately with the current status
+      callback(status); 
     } catch (error) {
       console.error("[socket] status handler failed:", error);
     }

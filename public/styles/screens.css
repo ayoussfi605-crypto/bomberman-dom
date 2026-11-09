@@ -178,7 +178,9 @@
   align-items: flex-start;
   gap: 16px;
 }
- .game-page { padding-left: var(--chat-sidebar-width); }
+.game-page {
+  padding-left: var(--chat-sidebar-width);
+}
 .game-board-container {
   position: relative;
   flex: 1;
