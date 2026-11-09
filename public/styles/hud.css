@@ -16,12 +16,12 @@
   gap: 2px;
   padding: 6px 8px;
   border-radius: 8px;
-  background: #f5f5f7;
+  background: rgba(255, 255, 255, 0.07);
 }
 
 .hud-me {
-  background: #ececef;
-  outline: 1px solid #111114;
+  background: rgba(242, 56, 112, 0.16);
+  outline: 1px solid var(--accent);
 }
 
 .nick {
@@ -29,10 +29,18 @@
   font-size: 0.9rem;
 }
 
-.nick.p0 { color: var(--p0); }
-.nick.p1 { color: var(--p1); }
-.nick.p2 { color: var(--p2); }
-.nick.p3 { color: var(--p3); }
+.nick.p0 {
+  color: var(--p0);
+}
+.nick.p1 {
+  color: var(--p1);
+}
+.nick.p2 {
+  color: var(--p2);
+}
+.nick.p3 {
+  color: var(--p3);
+}
 
 .lives {
   font-size: 0.8rem;

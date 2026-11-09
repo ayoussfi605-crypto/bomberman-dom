@@ -1,6 +1,7 @@
 import { h, handleKey } from '../../framework/index.js';
 
 let socket = null;
+let chatSidebarOpen = false;
 
 export function setChatSocket(nextSocket) {
   socket = nextSocket;
@@ -37,6 +38,14 @@ function onSubmit(event) {
   submitChat(event);
 }
 
+function toggleChatSidebar(event) {
+  chatSidebarOpen = !chatSidebarOpen;
+  const sidebar = event.currentTarget.closest('.chat-sidebar');
+  sidebar?.classList.toggle('is-open', chatSidebarOpen);
+  event.currentTarget.setAttribute('aria-expanded', String(chatSidebarOpen));
+  event.currentTarget.textContent = chatSidebarOpen ? 'Close chat' : 'Chat';
+}
+
 export function chatPanel(messages) {
   const entries = messages.map((message) => {
     const isSystem = message.from === null || message.system === true;
@@ -50,7 +59,10 @@ export function chatPanel(messages) {
   });
 
   return h('section', { class: 'chat', 'aria-label': 'Game chat' },
-    h('h2', { class: 'chat-header' }, 'Chat'),
+    h('div', { class: 'chat-header' },
+      h('h2', {}, 'Arena chat'),
+      h('span', { class: 'chat-status' }, 'LIVE')
+    ),
     h('ul', { class: 'chat-log', id: 'chat-log', 'aria-live': 'polite' }, ...entries),
     h('form', { class: 'chat-form', onSubmit },
       h('input', {
@@ -67,4 +79,18 @@ export function chatPanel(messages) {
       h('button', { class: 'chat-submit-btn', type: 'submit' }, 'Send')
     )
   );
+}
+
+export function chatSidebar(messages, renderPanel = chatPanel) {
+  return h('aside', {
+    class: chatSidebarOpen ? 'chat-sidebar is-open' : 'chat-sidebar',
+    'aria-label': 'Chat sidebar'
+  },
+  h('button', {
+    class: 'chat-sidebar-toggle',
+    type: 'button',
+    'aria-expanded': String(chatSidebarOpen),
+    onClick: toggleChatSidebar
+  }, chatSidebarOpen ? 'Close chat' : 'Chat'),
+  renderPanel(messages));
 }

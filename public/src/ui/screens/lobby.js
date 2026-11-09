@@ -9,7 +9,7 @@ function timerLabel(timer, count) {
   return 'Waiting for players…';
 }
 
-export function lobbyScreen(state, chatVNode) {
+export function lobbyScreen(state) {
   const { count, max, players, timer } = state.lobby;
   const playerRows = players.map((nickname, index) =>
     h('li', { class: 'player-slot' },
@@ -25,7 +25,6 @@ export function lobbyScreen(state, chatVNode) {
       h('p', { class: 'counter-badge', 'aria-live': 'polite' }, `Players ${count} / ${max}`),
       h('p', { class: 'timer-badge', 'aria-live': 'polite' }, timerLabel(timer, count)),
       h('ul', { class: 'player-list', 'aria-label': 'Players in lobby' }, ...playerRows)
-    ),
-    h('aside', { class: 'lobby-chat' }, chatVNode)
+    )
   );
 }

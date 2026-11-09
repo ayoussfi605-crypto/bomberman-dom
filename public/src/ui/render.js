@@ -1,5 +1,5 @@
 import { h, render } from '../framework/index.js';
-import { chatPanel } from './components/chatPanel.js';
+import { chatSidebar } from './components/chatPanel.js';
 import { nicknameScreen } from './screens/nickname.js';
 import { lobbyScreen } from './screens/lobby.js';
 import { overScreen } from './screens/over.js';
@@ -44,14 +44,13 @@ export function renderApp(state) {
   if (!container) container = document.getElementById('app');
   if (!container) return;
 
-  const panel = chatPanel(state.chat);
   let screen;
   switch (state.screen) {
     case 'nickname':
       screen = nicknameScreen(state, joinAction);
       break;
     case 'lobby':
-      screen = lobbyScreen(state, panel);
+      screen = lobbyScreen(state);
       break;
     case 'over':
       screen = overScreen(state, replayAction);
@@ -59,7 +58,7 @@ export function renderApp(state) {
     default:
       screen = nicknameScreen(state, joinAction);
   }
-  render(h('div', { class: 'app-shell' }, headerVNode(), screen, perfOverlay()), container);
+  render(h('div', { class: 'app-shell' }, headerVNode(), screen, chatSidebar(state.chat), perfOverlay()), container);
 }
 
 export function initRenderer(store, actions) {

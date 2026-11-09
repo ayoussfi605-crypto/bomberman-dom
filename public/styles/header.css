@@ -17,7 +17,12 @@
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #5a5a66 0%, #17171c 55%, #000 100%);
+  background: radial-gradient(
+    circle at 35% 30%,
+    #5a5a66 0%,
+    #17171c 55%,
+    #000 100%
+  );
   animation: header-bounce 1.4s ease-in-out infinite;
 }
 
@@ -48,28 +53,41 @@
 }
 
 .header-title {
+  font-family: var(--font-display);
   font-size: 1.35rem;
   font-weight: 800;
-  letter-spacing: 0.28em;
-  color: #111114;
+  letter-spacing: 0.18em;
+  color: var(--fg);
 }
 
 .header-sub {
+  font-family: var(--font-display);
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.3em;
-  color: #8a8a94;
-  border: 1px solid #d9d9e0;
+  color: var(--muted);
+  border: 1px solid var(--panel-border);
   border-radius: 999px;
   padding: 3px 10px 3px 12px;
 }
 
 @keyframes header-bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-7px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
 }
 
 @keyframes spark-pulse {
-  from { transform: scale(0.55); opacity: 0.7; }
-  to { transform: scale(1.15); opacity: 1; }
+  from {
+    transform: scale(0.55);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(1.15);
+    opacity: 1;
+  }
 }

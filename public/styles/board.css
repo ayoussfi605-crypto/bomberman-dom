@@ -184,8 +184,11 @@
   width: var(--tile);
   height: var(--tile);
   will-change: transform;
-  border-radius: 50%;
-  border: 2px solid rgba(5, 8, 20, 0.55);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  filter: drop-shadow(0 1px 1px rgba(5, 8, 20, 0.5));
+  image-rendering: pixelated;
   transition: none;
 }
 
@@ -193,24 +196,10 @@
   display: none;
 }
 
-.player.p0 { background: radial-gradient(circle at 35% 28%, #ff9db0, var(--p0) 55%, #a31230); }
-.player.p1 { background: radial-gradient(circle at 35% 28%, #a5f3ff, var(--p1) 55%, #0b6f96); }
-.player.p2 { background: radial-gradient(circle at 35% 28%, #c9ffb0, var(--p2) 55%, #2f8f1c); }
-.player.p3 { background: radial-gradient(circle at 35% 28%, #ffe98a, var(--p3) 55%, #a97b00); }
-
-.player::before {
-  content: "";
-  position: absolute;
-  left: 22%;
-  top: 34%;
-  width: 56%;
-  height: 42%;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 34% 45%, #10131b 0 13%, transparent 14%),
-    radial-gradient(circle at 66% 45%, #10131b 0 13%, transparent 14%),
-    rgba(255, 255, 255, 0.92);
-}
+.player.p0 { background-image: url("/images/players/player2%20(1).png"); }
+.player.p1 { background-image: url("/images/players/player3%20(1).png"); }
+.player.p2 { background-image: url("/images/players/player1%20(1).png"); }
+.player.p3 { background-image: url("/images/players/player4%20(1).png"); }
 
 .player.dead {
   opacity: 0.25;

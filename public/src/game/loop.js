@@ -4,6 +4,7 @@ import { getTilesVNode, getPlayersVNode } from "./boardView.js";
 import { hudVNode as renderHud } from "./hud.js";
 import { setAlive as setInputAlive } from "./input.js";
 import { headerVNode } from "../ui/components/header.js";
+import { chatSidebar } from "../ui/components/chatPanel.js";
 
 let _running = false;
 let _rafId = null;
@@ -28,7 +29,7 @@ let _cachedChatVNode = null;
 function chatVNodeFor(chat) {
   if (chat !== _cachedChat) {
     _cachedChat = chat;
-    _cachedChatVNode = _chatPanel(chat);
+    _cachedChatVNode = chatSidebar(chat, _chatPanel);
   }
   return _cachedChatVNode;
 }
@@ -46,9 +47,9 @@ function gameScreen(f) {
     h("div", { class: "game" },
       hud,
       h("div", { class: "board" }, tilesVNode, playersVNode),
-      chatVNode,
       perf,
     ),
+    chatVNode,
   );
 }
 
