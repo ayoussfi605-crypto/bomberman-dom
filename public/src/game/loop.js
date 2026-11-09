@@ -3,7 +3,6 @@ import * as gameView from "./gameView.js";
 import { getTilesVNode, getPlayersVNode } from "./boardView.js";
 import { hudVNode as renderHud } from "./hud.js";
 import { setAlive as setInputAlive } from "./input.js";
-import { headerVNode } from "../ui/components/header.js";
 import { chatSidebar } from "../ui/components/chatPanel.js";
 
 let _running = false;
@@ -45,7 +44,6 @@ function gameScreen(f) {
   return h(
     "div",
     { class: "game-page" },
-    headerVNode(),
     h(
       "div",
       { class: "game" },

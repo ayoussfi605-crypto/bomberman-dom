@@ -5,7 +5,6 @@ import { lobbyScreen } from "./screens/lobby.js";
 import { overScreen } from "./screens/over.js";
 import { perfOverlay } from "../perf/perfOverlay.js";
 import { fpsMeter } from "../perf/fpsMeter.js";
-import { headerVNode } from "./components/header.js";
 
 let joinAction = () => {};
 let replayAction = () => {};
@@ -68,7 +67,6 @@ export function renderApp(state) {
     h(
       "div",
       { class: "app-shell" },
-      headerVNode(),
       screen,
       chatSidebar(state.chat),
       perfOverlay(),

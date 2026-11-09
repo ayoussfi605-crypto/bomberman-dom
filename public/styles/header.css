@@ -58,6 +58,7 @@
   font-weight: 800;
   letter-spacing: 0.18em;
   color: var(--fg);
+  animation: brand-sheen 3.6s ease-in-out infinite;
 }
 
 .header-sub {
@@ -89,5 +90,23 @@
   to {
     transform: scale(1.15);
     opacity: 1;
+  }
+}
+
+@keyframes brand-sheen {
+  0%,
+  100% {
+    text-shadow: 0 0 0 rgba(242, 56, 112, 0);
+  }
+  50% {
+    text-shadow: 0 0 12px rgba(242, 56, 112, 0.55);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header-bomb,
+  .bomb-spark,
+  .header-title {
+    animation: none;
   }
 }

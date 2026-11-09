@@ -20,7 +20,6 @@ export function createSession(ws, { now = () => Date.now() } = {}) {
       try {
         ws.send(JSON.stringify({ type, data }));
       } catch {
-        // A dying socket must never break a broadcast loop.
       }
     },
 
@@ -29,7 +28,6 @@ export function createSession(ws, { now = () => Date.now() } = {}) {
       try {
         ws.send(payload);
       } catch {
-        // Ignore: the close handler cleans the session up.
       }
     },
   };

@@ -162,16 +162,6 @@ export function createRoom(options = {}) {
     loop.start();
   }
 
-  function logTickRate() {
-    tickCount += 1;
-    const at = now();
-    if (at - lastRateLog < 1000) return;
-    const rate = (tickCount * 1000) / (at - lastRateLog);
-    logger.log?.(`[room] snapshot rate: ${rate.toFixed(1)} Hz`);
-    tickCount = 0;
-    lastRateLog = at;
-  }
-
   function stepGame(dtMs) {
     if (!game) return;
 
@@ -181,7 +171,6 @@ export function createRoom(options = {}) {
       broadcast(S2C.TILES, { tiles: game.getTiles() });
 
     broadcast(S2C.SNAPSHOT, game.getSnapshot());
-    logTickRate();
 
     const outcome = game.getResult();
     if (outcome) endGame(outcome);

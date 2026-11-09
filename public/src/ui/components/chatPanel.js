@@ -1,4 +1,5 @@
 import { h, handleKey } from "../../framework/index.js";
+import { headerVNode } from "./header.js";
 
 let socket = null;
 let chatSidebarOpen = false;
@@ -107,6 +108,7 @@ export function chatSidebar(messages, renderPanel = chatPanel) {
       class: chatSidebarOpen ? "chat-sidebar is-open" : "chat-sidebar",
       "aria-label": "Chat sidebar",
     },
+    h("div", { class: "chat-sidebar-brand" }, headerVNode()),
     h(
       "button",
       {

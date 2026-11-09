@@ -56,6 +56,10 @@ export function attachTransport({ wss, room, logger = console, now } = {}) {
     }
 
     const session = createSession(ws, { now });
+    console.log(
+      `[transport] new session ${session.id} from ${request?.socket?.remoteAddress}`,
+      session,
+    );
 
     ws.on("error", (error) => {
       logger.error?.("[transport] socket error:", error?.message ?? error);
