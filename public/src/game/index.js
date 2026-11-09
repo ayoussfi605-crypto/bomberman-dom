@@ -2,8 +2,8 @@ import * as gameView from "./gameView.js";
 import * as loop from "./loop.js";
 import * as input from "./input.js";
 
-export function initGame({ socket, store, fpsMeter, chatPanel, perfOverlay }) {
-  loop.init({ store, fpsMeter, chatPanel, perfOverlay });
+export function initGame({ socket, store, chatPanel }) {
+  loop.init({ store, chatPanel });
   input.init({ socket, store });
 
   const onStart = function (d) {

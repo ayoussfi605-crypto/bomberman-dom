@@ -18,7 +18,6 @@ real-browser or integrated-match evidence.
 | Chain reactions and tile updates | Place bombs between ticks and cause a chain; each bomb resolves once and all clients receive the updated full tile array. | Mohamed + Yacobe | Partial: `tilesChanged` flag verified for between-tick bomb placement (true once, false next tick) and chain logic reviewed; two-client chain broadcast pending real match |
 | Interpolation and stale data | Inspect motion at 30 Hz under jitter/catch-up; measure control latency and ensure stale/disconnected gameplay stops. | Hichame + Yacobe | Pending game integration |
 | Real multiplayer / disconnects | Four people finish a match, disconnect/refresh players, then play a second match; no stale timers, slots, listeners, or loops. | Whole team | Pending integrated team run |
-| FPS / frame-time overlay | Open `/?debug`; confirm FPS, average/max frame ms, and >20/>33 ms counts update no faster than 4 times/s. | Ayoub + Hichame | Pass: browser showed 60 FPS, 16.7 ms average, 16.8 ms max; 250 ms cache unit-tested (2026-11-06) |
 | DevTools Performance | Record 10 s of foreground gameplay with bombs/chat; target ~60 fps and save the frames chart and trace with hardware/browser details. | Hichame + Ayoub | Pending playable match and captured evidence |
 | Paint flashing | Enable Paint flashing; changed tiles may paint, while composited movement should avoid repainting unchanged board/HUD/chat. | Hichame | Pending playable match |
 | Layers | Inspect Layers panel; keep layer count low and avoid promoting all 195 board cells. | Hichame | Pending playable match |
@@ -26,5 +25,4 @@ real-browser or integrated-match evidence.
 
 Background tabs throttle animation frames. Use foreground tabs, close unrelated
 applications/extensions, and prefer separate devices for four-player
-performance checks. Debug FPS numbers supplement, not replace, DevTools
-recordings.
+performance checks. Use DevTools Performance recordings to inspect frame time.

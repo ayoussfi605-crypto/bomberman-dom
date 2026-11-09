@@ -9,7 +9,7 @@ Everything the player sees and does **during a match**, with the mini-framework,
 ## Boundaries
 
 - You own `public/src/game/`, `public/styles/board.css`, `public/styles/hud.css`.
-- You consume: the store (ayoub), `chatPanel()` (ayoub), `fpsMeter` / `perfOverlay` (ayoub), the socket (yacobe), the canonical framework (you maintain `public/src/framework/` and its verification tests; starter patches are already applied).
+- You consume: the store (ayoub), `chatPanel()` (ayoub), the socket (yacobe), the canonical framework (you maintain `public/src/framework/` and its verification tests; starter patches are already applied).
 - Develop with `?fake=1`: yacobe's fake socket plays a whole match with the real message shapes.
 - The framework only does `h / render / State / listen`. **No canvas, no WebGL, no other library, no `innerHTML`, no `<svg>`.**
 
@@ -29,7 +29,7 @@ public/styles/hud.css           HUD
 ## Features in detail
 
 ### 1. `index.js` — wiring (contract in `ARCHITECTURE.md` §7.5)
-- `socket.on("start", d)`: `gameView.reset(d)`; stop any existing loop, clear held keys, reset FPS/cache state; `store.setState({ phase: "playing", screen: "game", me: { ...me, slot: d.you }, players: d.players, result: null })`; `loop.start()`.
+- `socket.on("start", d)`: `gameView.reset(d)`; stop any existing loop, clear held keys; `store.setState({ phase: "playing", screen: "game", me: { ...me, slot: d.you }, players: d.players, result: null })`; `loop.start()`.
 - `socket.on("tiles", d)`: `gameView.setTiles(d.tiles)`.
 - `socket.on("snapshot", d)`: `gameView.pushSnapshot(d)`.
 - `socket.on("gameover", d)`: `loop.stop()`; `store.setState({ screen: "over", result: d })` (ayoub's `over` screen takes over `#app`).
@@ -77,13 +77,12 @@ Pure function `hud(players, frame, me)` → vnode: each player's nickname (in th
 ```
 start(): if (running) return; running = true; rafId = requestAnimationFrame(frame)
 frame(now): if (!running) return;
-  fpsMeter.frame(now)                       // ayoub's tool
   const f = gameView.getFrame(now)
   render(gameScreen(f), document.getElementById("app"))
   if (running) rafId = requestAnimationFrame(frame)
 stop(): running = false; cancelAnimationFrame(rafId); rafId = null
 ```
-`gameScreen(f)` = `h("div", { class: "game" }, hudVNode, h("div", { class: "board" }, tilesVNode, playersVNode), chatVNode, perfOverlay())`.
+`gameScreen(f)` = `h("div", { class: "game" }, hudVNode, h("div", { class: "board" }, tilesVNode, playersVNode), chatVNode)`.
 - `chatVNode = chatPanel(store.getState().chat)` **cached by the `chat` array reference** (rebuild only when it changes). ayoub's chat input uses stable module-level handlers so the cached vnode stays valid.
 - Store the pending rAF id, make start/stop idempotent, and clear held input on every game exit. Keep the screen check before rendering so a queued callback cannot overwrite another screen.
 - Do not render outside the loop while the game screen is active. Do not call `render` twice per frame.

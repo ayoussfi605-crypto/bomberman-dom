@@ -1,15 +1,15 @@
-# TASKS — ayoub: app shell, store, screens, chat UI, styling, performance tooling
+# TASKS — ayoub: app shell, store, screens, chat UI, styling
 
 Read first: `ARCHITECTURE.md` (§6, §7.3, §7.5, §7.6), `PROTOCOL.md`, `../shared/constants.js` (repository path: `shared/constants.js`).
 
 ## Mission
 
-Everything around the match: the page, the **nickname** page, the **waiting page with player counter and chat**, the game-over page, the chat panel used in lobby *and* in-game, the app store, the wiring, the global styling, and the **performance tooling** (FPS meter + audit checklist) that proves the 60 fps claims.
+Everything around the match: the page, the **nickname** page, the **waiting page with player counter and chat**, the game-over page, the chat panel used in lobby *and* in-game, the app store, the wiring, the global styling, and the audit checklist.
 
 ## Boundaries
 
-- You own `public/index.html`, `public/styles/base.css|screens.css|chat.css`, `public/src/main.js`, `public/src/state/`, `public/src/ui/`, `public/src/perf/`, `docs/AUDIT_CHECKLIST.md`, root `README.md`.
-- You consume the framework (`h, render, State, handleKey`) and the socket (yacobe). hichame consumes your `store`, `chatPanel`, `fpsMeter`, `perfOverlay`. Publish these exports in your first PR, using clearly marked minimal implementations until their features land.
+- You own `public/index.html`, `public/styles/base.css|screens.css|chat.css`, `public/src/main.js`, `public/src/state/`, `public/src/ui/`, `docs/AUDIT_CHECKLIST.md`, root `README.md`.
+- You consume the framework (`h, render, State, handleKey`) and the socket (yacobe). Hichame consumes your `store` and `chatPanel`.
 - Framework only: **no `innerHTML`, no other library, no canvas, no `<svg>`**. The only direct DOM calls allowed are `scrollTop` for the chat log and `focus()/blur()`.
 - Develop with `?fake=1`: yacobe's fake socket gives you the whole lobby flow with real message shapes.
 
@@ -30,8 +30,6 @@ public/src/ui/screens/lobby.js
 public/src/ui/screens/over.js
 public/src/ui/components/chatPanel.js
 public/src/ui/chatScroll.js       keeps #chat-log scrolled to the bottom
-public/src/perf/fpsMeter.js
-public/src/perf/perfOverlay.js
 docs/AUDIT_CHECKLIST.md
 README.md                         how to install/run/test (npm i, npm start, 4 tabs)
 ```
@@ -83,9 +81,7 @@ Subscribe **once**: `store.subscribe(renderApp)` and call `renderApp()` once at 
 - A readable dark theme, responsive (works from 1024 px wide). Chat panel fixed width (~260 px) with scrolling log so it fits next to the board in game.
 - **No** heavy effects on anything that is on screen during the game (no blur, big shadows, backdrop-filter). Keep the lobby pretty, keep the game screen cheap.
 
-### 9. Performance tooling (`perf/`)
-- `fpsMeter.js`: `fpsMeter.frame(now)` records frame deltas (ring buffer ~120); `fpsMeter.getStats()` → `{ fps, frameMsAvg, frameMsMax, over20ms, over33ms }` over the last second; `fpsMeter.reset()`. No allocations per frame.
-- `perfOverlay.js`: `perfOverlay()` → vnode or `null`. Only active when the URL has `?debug`. It shows fps / avg & max frame ms / long-frame counts and **refreshes its text at most 4×/s** (return the cached vnode otherwise), so it doesn't cost frames itself.
+### 9. Audit checklist
 - `docs/AUDIT_CHECKLIST.md`: the procedure and evidence for every audit question (below).
 
 ## `docs/AUDIT_CHECKLIST.md` (starter included; you maintain it, the whole team uses it)
@@ -107,11 +103,10 @@ For each item: how to test, expected result, who owns a fix. Cover at least:
 
 | Phase | Deliver | Done when |
 |---|---|---|
-| 1 | Extend starter `index.html`, `base.css`, `main.js`; publish `store.js`, `ui/index.js`, `render.js`, `chatPanel`, `fpsMeter`/`perfOverlay` exports (minimal versions allowed) | page renders the nickname screen with `?fake=1` |
+| 1 | Extend starter `index.html`, `base.css`, `main.js`; publish `store.js`, `ui/index.js`, `render.js`, and `chatPanel` (minimal versions allowed) | page renders the nickname screen with `?fake=1` |
 | 2 | nickname + lobby screens + `netHandlers` + `chatPanel` + `chatScroll` | full lobby flow works with the fake socket, incl. error messages and timers |
 | 3 | `over.js`, styling pass | game-over → back to lobby works |
-| 4 | `fpsMeter` + `perfOverlay` (hichame needs `fpsMeter.frame` early; the first-PR exports must already exist) | `?debug` overlay shows live numbers |
-| 5 | `AUDIT_CHECKLIST.md` + root `README.md`; run it against the real server with the team | every checklist item has a result |
+| 4 | `AUDIT_CHECKLIST.md` + root `README.md`; run it against the real server with the team | every checklist item has a result |
 
 ## Audit questions you are responsible for
 

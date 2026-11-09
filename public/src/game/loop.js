@@ -9,15 +9,11 @@ let _running = false;
 let _rafId = null;
 let _container = null;
 let _store = null;
-let _fpsMeter = null;
 let _chatPanel = null;
-let _perfOverlay = null;
 
-export function init({ store, fpsMeter, chatPanel, perfOverlay }) {
+export function init({ store, chatPanel }) {
   _store = store;
-  _fpsMeter = fpsMeter;
   _chatPanel = chatPanel;
-  _perfOverlay = perfOverlay;
 }
 
 // The chat vnode is cached by the chat array reference (ARCHITECTURE §7.5):
@@ -39,7 +35,6 @@ function gameScreen(f) {
   const tilesVNode = getTilesVNode(f);
   const playersVNode = getPlayersVNode(f);
   const chatVNode = chatVNodeFor(state.chat);
-  const perf = _perfOverlay();
 
   return h(
     "div",
@@ -49,7 +44,6 @@ function gameScreen(f) {
       { class: "game" },
       hud,
       h("div", { class: "board" }, tilesVNode, playersVNode),
-      perf,
     ),
     chatVNode,
   );
@@ -57,7 +51,6 @@ function gameScreen(f) {
 
 function frame(now) {
   if (!_running) return;
-  _fpsMeter.frame(now);
   const f = gameView.getFrame(now);
   // Dead players must not send input/bombs (server also ignores them).
   const me = f.players.find((p) => p.slot === _store.getState().me?.slot);

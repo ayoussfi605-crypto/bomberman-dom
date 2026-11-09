@@ -48,7 +48,6 @@ bomberman-dom/
       ├─ net/ socket.js fakeSocket.js          yacobe
       ├─ state/store.js              ayoub
       ├─ ui/  (screens, components, netHandlers, render, chatScroll)   ayoub
-      ├─ perf/ fpsMeter.js perfOverlay.js      ayoub
       └─ game/ (index, gameView, loop, input, boardView, hud)         hichame
 ```
 
@@ -88,7 +87,7 @@ The server serves `public/` at `/` and `shared/` at `/shared/`. Client code impo
 5. No layout reads (`offsetWidth`, `getBoundingClientRect`…) inside the frame loop. The board scales with CSS only (`--tile` from `min(vw, vh)`).
 6. Event handlers in per-frame trees are **module-level constants** (never inline arrows), otherwise listeners are re-registered every frame.
 7. No `innerHTML` anywhere. No `<svg>` elements (the framework has no SVG namespace support): sprites are CSS shapes or `<img>`.
-8. Budget: under ~4 ms of JS per frame. `?debug` shows an FPS / frame-time overlay.
+8. Budget: under ~4 ms of JS per frame; verify frame time with DevTools Performance recordings.
 
 ## 7. Interfaces (integration draft; stabilize after M1)
 

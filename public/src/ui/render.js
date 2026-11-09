@@ -3,41 +3,10 @@ import { chatSidebar } from "./components/chatPanel.js";
 import { nicknameScreen } from "./screens/nickname.js";
 import { lobbyScreen } from "./screens/lobby.js";
 import { overScreen } from "./screens/over.js";
-import { perfOverlay } from "../perf/perfOverlay.js";
-import { fpsMeter } from "../perf/fpsMeter.js";
 
 let joinAction = () => {};
 let replayAction = () => {};
 let container = null;
-let currentStore = null;
-let perfFrame = null;
-let lastPerfRender = 0;
-const debugEnabled = new URLSearchParams(globalThis.location?.search ?? "").has(
-  "debug",
-);
-
-function runPerfFrame(now) {
-  perfFrame = null;
-  const state = currentStore?.getState();
-  if (!state || state.screen === "game") return;
-
-  fpsMeter.frame(now);
-  if (now - lastPerfRender >= 250) {
-    lastPerfRender = now;
-    renderApp(state);
-  }
-  perfFrame = requestAnimationFrame(runPerfFrame);
-}
-
-function startPerfFrames() {
-  if (
-    debugEnabled &&
-    perfFrame === null &&
-    currentStore?.getState().screen !== "game"
-  ) {
-    perfFrame = requestAnimationFrame(runPerfFrame);
-  }
-}
 
 export function configureRenderActions({ onJoin, onReplay }) {
   joinAction = onJoin;
@@ -69,7 +38,6 @@ export function renderApp(state) {
       { class: "app-shell" },
       screen,
       chatSidebar(state.chat),
-      perfOverlay(),
     ),
     container,
   );
@@ -77,17 +45,7 @@ export function renderApp(state) {
 
 export function initRenderer(store, actions) {
   configureRenderActions(actions);
-  currentStore = store;
-  const unsubscribe = store.subscribe((state) => {
-    renderApp(state);
-    startPerfFrames();
-  });
+  const unsubscribe = store.subscribe(renderApp);
   renderApp(store.getState());
-  startPerfFrames();
-  return () => {
-    unsubscribe();
-    if (perfFrame !== null) cancelAnimationFrame(perfFrame);
-    perfFrame = null;
-    currentStore = null;
-  };
+  return unsubscribe;
 }

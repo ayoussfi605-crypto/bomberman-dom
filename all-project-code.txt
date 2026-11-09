@@ -534,7 +534,7 @@ Everything the player sees and does **during a match**, with the mini-framework,
 ## Boundaries
 
 - You own `public/src/game/`, `public/styles/board.css`, `public/styles/hud.css`.
-- You consume: the store (ayoub), `chatPanel()` (ayoub), `fpsMeter` / `perfOverlay` (ayoub), the socket (yacobe), the canonical framework (you maintain `public/src/framework/` and its verification tests; starter patches are already applied).
+- You consume: the store (ayoub), `chatPanel()` (ayoub), the socket (yacobe), the canonical framework (you maintain `public/src/framework/` and its verification tests; starter patches are already applied).
 - Develop with `?fake=1`: yacobe's fake socket plays a whole match with the real message shapes.
 - The framework only does `h / render / State / listen`. **No canvas, no WebGL, no other library, no `innerHTML`, no `<svg>`.**
 
@@ -602,13 +602,12 @@ Pure function `hud(players, frame, me)` → vnode: each player's nickname (in th
 ```
 start(): if (running) return; running = true; rafId = requestAnimationFrame(frame)
 frame(now): if (!running) return;
-  fpsMeter.frame(now)                       // ayoub's tool
   const f = gameView.getFrame(now)
   render(gameScreen(f), document.getElementById("app"))
   if (running) rafId = requestAnimationFrame(frame)
 stop(): running = false; cancelAnimationFrame(rafId); rafId = null
 ```
-`gameScreen(f)` = `h("div", { class: "game" }, hudVNode, h("div", { class: "board" }, tilesVNode, playersVNode), chatVNode, perfOverlay())`.
+`gameScreen(f)` = `h("div", { class: "game" }, hudVNode, h("div", { class: "board" }, tilesVNode, playersVNode), chatVNode)`.
 - `chatVNode = chatPanel(store.getState().chat)` **cached by the `chat` array reference** (rebuild only when it changes). ayoub's chat input uses stable module-level handlers so the cached vnode stays valid.
 - Store the pending rAF id, make start/stop idempotent, and clear held input on every game exit. Keep the screen check before rendering so a queued callback cannot overwrite another screen.
 - Do not render outside the loop while the game screen is active. Do not call `render` twice per frame.
@@ -785,18 +784,18 @@ client                         server
 FILE: ./docs/TASKS_AYOUB.md
 ========================================
 
-# TASKS — ayoub: app shell, store, screens, chat UI, styling, performance tooling
+# TASKS — ayoub: app shell, store, screens, chat UI, styling
 
 Read first: `ARCHITECTURE.md` (§6, §7.3, §7.5, §7.6), `PROTOCOL.md`, `../shared/constants.js` (repository path: `shared/constants.js`).
 
 ## Mission
 
-Everything around the match: the page, the **nickname** page, the **waiting page with player counter and chat**, the game-over page, the chat panel used in lobby *and* in-game, the app store, the wiring, the global styling, and the **performance tooling** (FPS meter + audit checklist) that proves the 60 fps claims.
+Everything around the match: the page, the **nickname** page, the **waiting page with player counter and chat**, the game-over page, the chat panel used in lobby *and* in-game, the app store, the wiring, the global styling, and the audit checklist.
 
 ## Boundaries
 
-- You own `public/index.html`, `public/styles/base.css|screens.css|chat.css`, `public/src/main.js`, `public/src/state/`, `public/src/ui/`, `public/src/perf/`, `docs/AUDIT_CHECKLIST.md`, root `README.md`.
-- You consume the framework (`h, render, State, handleKey`) and the socket (yacobe). hichame consumes your `store`, `chatPanel`, `fpsMeter`, `perfOverlay`. Publish these exports in your first PR, using clearly marked minimal implementations until their features land.
+- You own `public/index.html`, `public/styles/base.css|screens.css|chat.css`, `public/src/main.js`, `public/src/state/`, `public/src/ui/`, `docs/AUDIT_CHECKLIST.md`, root `README.md`.
+- You consume the framework (`h, render, State, handleKey`) and the socket (yacobe). hichame consumes your `store` and `chatPanel`. Publish these exports in your first PR, using clearly marked minimal implementations until their features land.
 - Framework only: **no `innerHTML`, no other library, no canvas, no `<svg>`**. The only direct DOM calls allowed are `scrollTop` for the chat log and `focus()/blur()`.
 - Develop with `?fake=1`: yacobe's fake socket gives you the whole lobby flow with real message shapes.
 
@@ -817,8 +816,6 @@ public/src/ui/screens/lobby.js
 public/src/ui/screens/over.js
 public/src/ui/components/chatPanel.js
 public/src/ui/chatScroll.js       keeps #chat-log scrolled to the bottom
-public/src/perf/fpsMeter.js
-public/src/perf/perfOverlay.js
 docs/AUDIT_CHECKLIST.md
 README.md                         how to install/run/test (npm i, npm start, 4 tabs)
 ```
@@ -870,9 +867,7 @@ Subscribe **once**: `store.subscribe(renderApp)` and call `renderApp()` once at 
 - A readable dark theme, responsive (works from 1024 px wide). Chat panel fixed width (~260 px) with scrolling log so it fits next to the board in game.
 - **No** heavy effects on anything that is on screen during the game (no blur, big shadows, backdrop-filter). Keep the lobby pretty, keep the game screen cheap.
 
-### 9. Performance tooling (`perf/`)
-- `fpsMeter.js`: `fpsMeter.frame(now)` records frame deltas (ring buffer ~120); `fpsMeter.getStats()` → `{ fps, frameMsAvg, frameMsMax, over20ms, over33ms }` over the last second; `fpsMeter.reset()`. No allocations per frame.
-- `perfOverlay.js`: `perfOverlay()` → vnode or `null`. Only active when the URL has `?debug`. It shows fps / avg & max frame ms / long-frame counts and **refreshes its text at most 4×/s** (return the cached vnode otherwise), so it doesn't cost frames itself.
+### 9. Audit checklist
 - `docs/AUDIT_CHECKLIST.md`: the procedure and evidence for every audit question (below).
 
 ## `docs/AUDIT_CHECKLIST.md` (starter included; you maintain it, the whole team uses it)
@@ -894,11 +889,10 @@ For each item: how to test, expected result, who owns a fix. Cover at least:
 
 | Phase | Deliver | Done when |
 |---|---|---|
-| 1 | Extend starter `index.html`, `base.css`, `main.js`; publish `store.js`, `ui/index.js`, `render.js`, `chatPanel`, `fpsMeter`/`perfOverlay` exports (minimal versions allowed) | page renders the nickname screen with `?fake=1` |
+| 1 | Extend starter `index.html`, `base.css`, `main.js`; publish `store.js`, `ui/index.js`, `render.js`, and `chatPanel` (minimal versions allowed) | page renders the nickname screen with `?fake=1` |
 | 2 | nickname + lobby screens + `netHandlers` + `chatPanel` + `chatScroll` | full lobby flow works with the fake socket, incl. error messages and timers |
 | 3 | `over.js`, styling pass | game-over → back to lobby works |
-| 4 | `fpsMeter` + `perfOverlay` (hichame needs `fpsMeter.frame` early; the first-PR exports must already exist) | `?debug` overlay shows live numbers |
-| 5 | `AUDIT_CHECKLIST.md` + root `README.md`; run it against the real server with the team | every checklist item has a result |
+| 4 | `AUDIT_CHECKLIST.md` + root `README.md`; run it against the real server with the team | every checklist item has a result |
 
 ## Audit questions you are responsible for
 
@@ -1145,7 +1139,6 @@ bomberman-dom/
       ├─ net/ socket.js fakeSocket.js          yacobe
       ├─ state/store.js              ayoub
       ├─ ui/  (screens, components, netHandlers, render, chatScroll)   ayoub
-      ├─ perf/ fpsMeter.js perfOverlay.js      ayoub
       └─ game/ (index, gameView, loop, input, boardView, hud)         hichame
 ```
 
@@ -1185,7 +1178,7 @@ The server serves `public/` at `/` and `shared/` at `/shared/`. Client code impo
 5. No layout reads (`offsetWidth`, `getBoundingClientRect`…) inside the frame loop. The board scales with CSS only (`--tile` from `min(vw, vh)`).
 6. Event handlers in per-frame trees are **module-level constants** (never inline arrows), otherwise listeners are re-registered every frame.
 7. No `innerHTML` anywhere. No `<svg>` elements (the framework has no SVG namespace support): sprites are CSS shapes or `<img>`.
-8. Budget: under ~4 ms of JS per frame. `?debug` shows an FPS / frame-time overlay.
+8. Budget: under ~4 ms of JS per frame; verify frame time with DevTools Performance recordings.
 
 ## 7. Interfaces (integration draft; stabilize after M1)
 
