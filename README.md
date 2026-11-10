@@ -212,8 +212,11 @@ Future features and enhancements:
 ## 👨‍💻 Author
 
 **Yaakoub Elhaouari**
+
 **Mohamed Ben bouaza**
+
 **Hichame Ait benalla**
+
 **Ayoub Elyoussefi**
 
 - GitHub: https://learn.zone01oujda.ma/git/mbenboua/bomberman-dom.git
